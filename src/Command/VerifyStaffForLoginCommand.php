@@ -43,8 +43,11 @@ final class VerifyStaffForLoginCommand extends Command
             if ($staff === null) {
                 continue;
             }
-            if (!$staff->isVerified()) {
+            if (!$staff->isVerified() || !$staff->isActive() || $staff->getStatus() !== 'active') {
                 $staff->setIsVerified(true);
+                $staff->setIsActive(true);
+                $staff->setStatus('active');
+                $staff->setVerificationToken(null);
                 ++$updated;
             }
         }

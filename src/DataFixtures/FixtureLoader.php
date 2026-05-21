@@ -130,6 +130,22 @@ final class FixtureLoader
       'is_verified' => 1,
       'verification_token' => NULL,
     ),
+    1 =>
+    array (
+      'id' => 12,
+      'full_name' => 'Demo Staff',
+      'email' => 'staff@shoesrus.local',
+      'password' => '$2y$13$cKUyvp1PFBT3zLneagBy8OD0d2nqXOeAZ3WZvPRR4gtVRH5wBwBoy',
+      'roles' =>
+      array (
+        0 => 'ROLE_STAFF',
+      ),
+      'created_at' => '2026-05-21 00:00:00',
+      'is_active' => 1,
+      'status' => 'active',
+      'is_verified' => 1,
+      'verification_token' => NULL,
+    ),
   ),
   'customer' => 
   array (

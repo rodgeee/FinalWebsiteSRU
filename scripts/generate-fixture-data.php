@@ -95,9 +95,47 @@ foreach ($tables as $table) {
     echo sprintf("%s: %d row(s)\n", $table, count($rows));
 }
 
+$data['tables']['staff'] = merge_demo_staff_fixture($data['tables']['staff'] ?? []);
+
 $outDir = $root.'/src/DataFixtures';
 if (!is_dir($outDir)) {
     mkdir($outDir, 0775, true);
+}
+
+/**
+ * Ensures the built-in demo staff account is always present in exported fixtures.
+ *
+ * @param list<array<string, mixed>> $rows
+ * @return list<array<string, mixed>>
+ */
+function merge_demo_staff_fixture(array $rows): array
+{
+    $demoEmail = 'staff@shoesrus.local';
+    foreach ($rows as $row) {
+        if (($row['email'] ?? '') === $demoEmail) {
+            return $rows;
+        }
+    }
+
+    $maxId = 0;
+    foreach ($rows as $row) {
+        $maxId = max($maxId, (int) ($row['id'] ?? 0));
+    }
+
+    $rows[] = [
+        'id' => $maxId > 0 ? $maxId + 1 : 12,
+        'full_name' => 'Demo Staff',
+        'email' => $demoEmail,
+        'password' => '$2y$13$cKUyvp1PFBT3zLneagBy8OD0d2nqXOeAZ3WZvPRR4gtVRH5wBwBoy',
+        'roles' => ['ROLE_STAFF'],
+        'created_at' => '2026-05-21 00:00:00',
+        'is_active' => 1,
+        'status' => 'active',
+        'is_verified' => 1,
+        'verification_token' => null,
+    ];
+
+    return $rows;
 }
 
 require __DIR__.'/build-app-fixtures-class.php';

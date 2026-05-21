@@ -207,6 +207,20 @@ run_post_deploy_tasks() {
             --no-interaction || true
     fi
 
+    bootstrap_staff_email="${BOOTSTRAP_STAFF_EMAIL:-}"
+    bootstrap_staff_password="${BOOTSTRAP_STAFF_PASSWORD:-}"
+    if [ "${ENSURE_DEFAULT_STAFF:-0}" = "1" ]; then
+        bootstrap_staff_email="${bootstrap_staff_email:-staff@shoesrus.local}"
+    fi
+    if [ -n "${bootstrap_staff_email}" ] && [ -n "${bootstrap_staff_password}" ]; then
+        echo "Ensuring staff login account (${bootstrap_staff_email})..."
+        run_console app:create-staff \
+            --email="${bootstrap_staff_email}" \
+            --password="${bootstrap_staff_password}" \
+            --full-name="Demo Staff" \
+            --no-interaction || true
+    fi
+
     import_file="${DATABASE_IMPORT_FILE:-/app/data/railway-import.sql}"
     if [ -f "${import_file}" ]; then
         run_console app:import-mysql-dump "${import_file}" --only-if-empty --no-interaction || true
