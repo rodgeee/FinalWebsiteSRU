@@ -38,6 +38,8 @@ elif [ -n "${JWT_PASSPHRASE}" ] && ! openssl pkey -in /app/config/jwt/private.pe
     echo "WARNING: JWT_PASSPHRASE does not match private.pem — clearing it (Docker keys are unencrypted)." >&2
     export JWT_PASSPHRASE=""
 fi
+# PHP-FPM runs as www-data; keys are created root:root mode 600 during build/entrypoint.
+chown www-data:www-data /app/config/jwt/private.pem /app/config/jwt/public.pem 2>/dev/null || true
 if [ -z "${DEFAULT_URI}" ] && [ -n "${RAILWAY_PUBLIC_DOMAIN}" ]; then
     export DEFAULT_URI="https://${RAILWAY_PUBLIC_DOMAIN}"
 fi

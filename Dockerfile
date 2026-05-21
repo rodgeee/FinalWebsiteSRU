@@ -35,7 +35,8 @@ RUN mkdir -p config/jwt \
     && openssl genpkey -algorithm RSA -out config/jwt/private.pem -pkeyopt rsa_keygen_bits:4096 \
     && openssl pkey -in config/jwt/private.pem -pubout -out config/jwt/public.pem \
     && chmod 644 config/jwt/public.pem \
-    && chmod 600 config/jwt/private.pem
+    && chmod 600 config/jwt/private.pem \
+    && chown www-data:www-data config/jwt/private.pem config/jwt/public.pem
 
 # Build frontend assets needed by the Symfony templates
 RUN npm install --no-progress \

@@ -44,9 +44,7 @@ final class GoogleAuthController extends AbstractController
         $result = $this->googleCustomerAuth->authenticate($profile, $action);
 
         return match ($result->status) {
-            GoogleCustomerAuthResult::STATUS_JWT_READY => $this->json([
-                'token' => $this->jwtManager->create($result->customer),
-            ]),
+            GoogleCustomerAuthResult::STATUS_JWT_READY => $this->jwtResponse($result),
             GoogleCustomerAuthResult::STATUS_SIGNUP_PENDING => $this->json(
                 ['message' => $result->message],
                 Response::HTTP_CREATED
@@ -65,6 +63,25 @@ final class GoogleAuthController extends AbstractController
             ),
             default => $this->json(['message' => 'Google sign-in failed.'], Response::HTTP_INTERNAL_SERVER_ERROR),
         };
+    }
+
+    private function jwtResponse(GoogleCustomerAuthResult $result): JsonResponse
+    {
+        $customer = $result->customer;
+        if ($customer === null) {
+            return $this->json(['message' => 'Google sign-in failed.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        try {
+            return $this->json([
+                'token' => $this->jwtManager->create($customer),
+            ]);
+        } catch (\Throwable) {
+            return $this->json(
+                ['message' => 'Could not start your session. Please try again.'],
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     /**
