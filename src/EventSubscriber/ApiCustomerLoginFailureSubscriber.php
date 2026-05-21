@@ -15,8 +15,9 @@ use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusExce
  */
 final class ApiCustomerLoginFailureSubscriber implements EventSubscriberInterface
 {
-    public const MESSAGE_NOT_REGISTERED = 'Please use an existing account or sign up for an account.';
-    public const MESSAGE_BAD_CREDENTIALS = 'Incorrect email or password.';
+    public const MESSAGE_NOT_REGISTERED =
+        'No customer account with this email. Create an account on Sign up, or check your spelling.';
+    public const MESSAGE_BAD_CREDENTIALS = 'Incorrect password for this email.';
 
     public function __construct(
         private readonly ApiResponseFactory $api,

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Service\Api\ApiResponseFactory;
 use App\Service\Google\GoogleCustomerAuthResult;
 use App\Service\Google\GoogleCustomerAuthService;
 use App\Service\Google\GoogleIdTokenVerifier;
@@ -18,6 +19,7 @@ final class GoogleAuthController extends AbstractController
         private readonly GoogleIdTokenVerifier $idTokenVerifier,
         private readonly GoogleCustomerAuthService $googleCustomerAuth,
         private readonly JWTTokenManagerInterface $jwtManager,
+        private readonly ApiResponseFactory $api,
     ) {
     }
 
@@ -69,19 +71,26 @@ final class GoogleAuthController extends AbstractController
     {
         $customer = $result->customer;
         if ($customer === null) {
-            return $this->json(['message' => 'Google sign-in failed.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->api->error('Google sign-in failed.', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         try {
-            return $this->json([
-                'token' => $this->jwtManager->create($customer),
-            ]);
+            $jwt = $this->jwtManager->create($customer);
         } catch (\Throwable) {
-            return $this->json(
-                ['message' => 'Could not start your session. Please try again.'],
+            return $this->api->error(
+                'Could not start your session. Please try again.',
                 Response::HTTP_INTERNAL_SERVER_ERROR,
             );
         }
+
+        $body = json_decode($this->api->success(['token' => $jwt])->getContent(), true);
+        if (!is_array($body)) {
+            return $this->api->success(['token' => $jwt]);
+        }
+
+        $body['token'] = $jwt;
+
+        return new JsonResponse($body, Response::HTTP_OK);
     }
 
     /**

@@ -18,9 +18,7 @@ security:
                 class: App\Entity\Staff
                 property: email
         customer_user_provider:
-            entity:
-                class: App\Entity\Customer
-                property: email
+            id: App\Security\CustomerUserProvider
         chain_user_provider:
             chain:
                 # Admin emails must resolve to Adminuser first (avoids staff row stealing login).

@@ -251,6 +251,7 @@ run_post_deploy_tasks() {
     fi
 
     run_console app:verify-staff-for-login --no-interaction || true
+    run_console app:verify-customers-for-login --no-interaction || true
 
     bootstrap_email="${BOOTSTRAP_ADMIN_EMAIL:-}"
     bootstrap_password="${BOOTSTRAP_ADMIN_PASSWORD:-}"

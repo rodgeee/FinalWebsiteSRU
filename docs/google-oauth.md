@@ -59,7 +59,7 @@ The Vallejera app uses **native Google Sign-In** and exchanges the device `idTok
 |------|--------|
 | Endpoint | `POST /api/login/google` |
 | Body | `{ "idToken": "<from Google Sign-In>", "action": "login" \| "signup" }` |
-| Success (login) | `200` + `{ "token": "..." }` |
+| Success (login) | `200` + `{ "success": true, "data": { "token": "..." }, "token": "..." }` (top-level `token` kept for older app builds) |
 | Sign-up created | `201` + `{ "message": "..." }` (no JWT until email verified) |
 | Unverified login | `403` + `{ "message": "..." }` |
 | Unknown account on login | `422` + `{ "message": "..." }` |

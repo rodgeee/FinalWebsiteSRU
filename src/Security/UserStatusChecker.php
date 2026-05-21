@@ -39,8 +39,9 @@ final class UserStatusChecker implements UserCheckerInterface
 
     private function assertVerified(UserInterface $user): void
     {
-        if ($user instanceof Customer && !$user->isVerified()) {
-            throw new CustomUserMessageAccountStatusException('Please verify your email address before logging in.');
+        // Customers (mobile app + storefront) do not require email verification.
+        if ($user instanceof Customer) {
+            return;
         }
 
         if ($user instanceof Staff && !$user->isVerified()) {

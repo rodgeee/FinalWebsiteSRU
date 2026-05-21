@@ -27,7 +27,10 @@ final class ApiResponseFactory
     ): JsonResponse {
         $errors = [['field' => $field, 'message' => $message]];
 
-        return new JsonResponse($this->envelope(false, null, $errors, $meta), $status);
+        return new JsonResponse(
+            $this->withLegacyMessage($this->envelope(false, null, $errors, $meta), $message),
+            $status,
+        );
     }
 
     /**
@@ -36,7 +39,26 @@ final class ApiResponseFactory
      */
     public function errors(array $errors, int $status = 422, array $meta = []): JsonResponse
     {
-        return new JsonResponse($this->envelope(false, null, $errors, $meta), $status);
+        $firstMessage = isset($errors[0]['message']) ? (string) $errors[0]['message'] : 'Request failed.';
+
+        return new JsonResponse(
+            $this->withLegacyMessage($this->envelope(false, null, $errors, $meta), $firstMessage),
+            $status,
+        );
+    }
+
+    /**
+     * Mobile clients may read either errors[0].message or a top-level message.
+     *
+     * @param array<string, mixed> $body
+     *
+     * @return array<string, mixed>
+     */
+    private function withLegacyMessage(array $body, string $message): array
+    {
+        $body['message'] = $message;
+
+        return $body;
     }
 
     /**
