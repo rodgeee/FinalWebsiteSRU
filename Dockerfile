@@ -56,10 +56,10 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=builder /app /app
 
-RUN mkdir -p /app/var && \
-    chown -R www-data:www-data /app && \
-    chmod -R 755 /app && \
-    chmod -R 775 /app/var
+# Explicit var subdirs + ownership so PHP-FPM (www-data) can write cache/logs
+RUN mkdir -p /app/var/cache /app/var/log /app/var/cache/prod \
+    && chown -R www-data:www-data /app/var \
+    && chmod -R 775 /app/var
 
 COPY nginx-main.conf /etc/nginx/nginx.conf
 

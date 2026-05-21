@@ -27,7 +27,7 @@ framework:
 when@dev:
     framework:
         # Loosen host checks entirely in dev to unblock local/ngrok browsing.
-        trusted_hosts: ['^.+$']
+        trusted_hosts: ['^.*$']
 
     #esi: true
     #fragments: true
@@ -35,7 +35,7 @@ when@dev:
 when@prod:
     framework:
         # Railway / load balancers: allow any host (health checks use 127.0.0.1, public URL, etc.)
-        trusted_hosts: ['^.+$']
+        trusted_hosts: ['^.*$']
 
 when@test:
     framework:
