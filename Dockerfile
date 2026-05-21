@@ -48,7 +48,8 @@ RUN npm install --no-progress \
 # --no-scripts: skip cache:clear (needs a live DB and full .env at build time)
 RUN composer install --no-interaction --no-dev --optimize-autoloader --no-ansi --no-scripts \
     && php bin/console importmap:install --no-interaction \
-    && php bin/console assets:install public --no-interaction
+    && php bin/console assets:install public --no-interaction \
+    && php bin/console asset-map:compile --no-interaction
 
 FROM php:8.3-fpm AS runtime
 

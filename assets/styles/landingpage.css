@@ -1,3 +1,5 @@
+@import "./fonts.css";
+
 /* Typography: sans-serif (body/UI), Sora (headings/display) */
 body, button, input, select, textarea {
     font-family: sans-serif;
