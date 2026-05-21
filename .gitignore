@@ -26,3 +26,4 @@
 node_modules
 products-export.sql
 auth-export.sql
+/data/railway-import.sql

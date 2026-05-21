@@ -16,15 +16,6 @@ admin_root_redirect:
         permanent: false
     condition: "env('APP_ROOT_TO_ADMIN') == '1' or request.getHost() matches '/\\.up\\.railway\\.app$/'"
 
-# /landingpage is the public shop URL; on Railway/admin mode send visitors to admin login instead.
-admin_landingpage_redirect:
-    path: /landingpage
-    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
-    defaults:
-        route: adminls_login
-        permanent: false
-    condition: "env('APP_ROOT_TO_ADMIN') == '1' or request.getHost() matches '/\\.up\\.railway\\.app$/'"
-
 # Default root redirects to the public landing page (local dev and storefront URL).
 root_landingpage_redirect:
     path: /

@@ -140,13 +140,17 @@ if [ -n "${DATABASE_URL}" ]; then
                 --full-name="System Admin" \
                 --no-interaction || true
         fi
+
+        import_file="${DATABASE_IMPORT_FILE:-/app/data/railway-import.sql}"
+        if [ -f "${import_file}" ]; then
+            echo "Importing database dump (${import_file}) when catalog is empty..."
+            run_console app:import-mysql-dump "${import_file}" --only-if-empty --no-interaction || true
+        fi
+
+        echo "Ensuring storefront catalog has products (demo seed if empty)..."
+        run_console app:seed-demo-products --no-interaction || true
     else
         echo "WARNING: DATABASE_URL present but DB unreachable — skipping migrations." >&2
-    fi
-
-    if [ "${SEED_DEMO_PRODUCTS:-0}" = "1" ]; then
-        echo "Seeding demo products (only when catalog is empty)..."
-        run_console app:seed-demo-products --no-interaction || true
     fi
 else
     echo "WARNING: DATABASE_URL is not set — skipping migrations and product seed." >&2

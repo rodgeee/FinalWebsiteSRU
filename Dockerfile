@@ -58,6 +58,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     nginx \
     curl \
+    default-mysql-client \
     libicu-dev \
     && docker-php-ext-configure intl \
     && docker-php-ext-install pdo pdo_mysql opcache intl \
