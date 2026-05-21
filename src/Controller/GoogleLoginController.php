@@ -14,7 +14,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Psr\Log\LoggerInterface;
@@ -35,21 +37,21 @@ final class GoogleLoginController extends AbstractController
     }
 
     #[Route('/login/google', name: 'customer_login_google', methods: ['GET'])]
-    public function start(Request $request): RedirectResponse
+    public function start(Request $request, UrlGeneratorInterface $urlGenerator): RedirectResponse
     {
-        return $this->startOAuth($request, 'login');
+        return $this->startOAuth($request, 'login', $urlGenerator);
     }
 
     #[Route('/signup/google', name: 'customer_signup_google', methods: ['GET'])]
-    public function startSignup(Request $request): RedirectResponse
+    public function startSignup(Request $request, UrlGeneratorInterface $urlGenerator): RedirectResponse
     {
-        return $this->startOAuth($request, 'signup');
+        return $this->startOAuth($request, 'signup', $urlGenerator);
     }
 
-    private function startOAuth(Request $request, string $action): RedirectResponse
+    private function startOAuth(Request $request, string $action, UrlGeneratorInterface $urlGenerator): RedirectResponse
     {
         $clientId = $this->googleClientId;
-        $redirectUri = $this->googleCallbackUrl;
+        $redirectUri = $this->resolveRedirectUri($request, $urlGenerator);
 
         $loginRoute = $action === 'signup' ? 'customer_signup' : 'customer_login';
         if ($clientId === '' || $redirectUri === '') {
@@ -59,7 +61,7 @@ final class GoogleLoginController extends AbstractController
                     $this->mobileJwtBridge->errorRedirect('Google OAuth is not configured on the server.')
                 );
             }
-            $this->addFlash('error', 'Google OAuth is not configured (missing GOOGLE_CLIENT_ID / GOOGLE_CALLBACK_URL).');
+            $this->addFlash('error', 'Google OAuth is not configured (missing GOOGLE_CLIENT_ID).');
 
             return $this->redirectToRoute($loginRoute);
         }
@@ -107,6 +109,7 @@ final class GoogleLoginController extends AbstractController
         HttpClientInterface $httpClient,
         LoggerInterface $logger,
         RouterInterface $router,
+        UrlGeneratorInterface $urlGenerator,
         Security $security
     ): Response {
         $isApp = $this->mobileJwtBridge->isAppPlatform($request);
@@ -161,7 +164,7 @@ final class GoogleLoginController extends AbstractController
 
         $clientId = $this->googleClientId;
         $clientSecret = $this->googleClientSecret;
-        $redirectUri = $this->googleCallbackUrl;
+        $redirectUri = $this->resolveRedirectUri($request, $urlGenerator);
 
         if ($clientId === '' || $clientSecret === '' || $redirectUri === '') {
             $message = 'Google OAuth is not configured.';
@@ -218,11 +221,13 @@ final class GoogleLoginController extends AbstractController
         }
 
         if ($tokenResponse->getStatusCode() >= 400) {
+            $errorCode = (string) ($tokenData['error'] ?? '');
             $logger->warning('Google token endpoint returned error.', [
                 'status' => $tokenResponse->getStatusCode(),
+                'error' => $errorCode,
                 'body_preview' => substr((string) $tokenResponse->getContent(false), 0, 500),
             ]);
-            $message = 'Google login failed: token exchange rejected. Confirm GOOGLE_CALLBACK_URL matches this app URL exactly.';
+            $message = $this->mapGoogleTokenErrorMessage($errorCode, $redirectUri);
             if ($isApp) {
                 return $this->finalizeOAuthRedirect($request, $this->mobileJwtBridge->errorRedirect($message));
             }
@@ -308,7 +313,21 @@ final class GoogleLoginController extends AbstractController
 
         $router->getContext()->fromRequest($request);
         $profile = new GoogleProfile($email, $fullName, $givenName, $familyName);
-        $authResult = $this->googleCustomerAuth->authenticate($profile, $oauthAction);
+
+        try {
+            $authResult = $this->googleCustomerAuth->authenticate($profile, $oauthAction);
+        } catch (ConnectionException $e) {
+            $logger->error('Google login failed: database unavailable.', [
+                'exception_message' => $e->getMessage(),
+            ]);
+            $message = 'Google sign-in could not finish because the database is unavailable. Start MySQL (e.g. docker compose up -d mysql), then click Continue with Google again. Do not refresh this page.';
+            if ($isApp) {
+                return $this->finalizeOAuthRedirect($request, $this->mobileJwtBridge->errorRedirect($message));
+            }
+            $this->addFlash('error', $message);
+
+            return $this->finalizeOAuthRedirect($request, $this->redirectToRoute('customer_login'));
+        }
 
         if ($isApp) {
             return $this->finalizeOAuthRedirect($request, $this->mapAuthResultToAppRedirect($authResult));
@@ -410,6 +429,29 @@ final class GoogleLoginController extends AbstractController
     private function wantsAppPlatform(Request $request): bool
     {
         return $request->query->get('platform') === 'app';
+    }
+
+    private function resolveRedirectUri(Request $request, UrlGeneratorInterface $urlGenerator): string
+    {
+        $urlGenerator->getContext()->fromRequest($request);
+
+        return $urlGenerator->generate(
+            'customer_google_check',
+            [],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+    }
+
+    private function mapGoogleTokenErrorMessage(string $errorCode, string $redirectUri): string
+    {
+        return match ($errorCode) {
+            'invalid_grant' => 'Google login was interrupted or this link was already used. Click "Continue with Google" again to start fresh (do not refresh the callback page).',
+            'redirect_uri_mismatch' => sprintf(
+                'Google login failed: redirect URI mismatch. Add this exact URL under Authorized redirect URIs in Google Cloud Console: %s',
+                $redirectUri
+            ),
+            default => 'Google login failed: token exchange rejected. If you refreshed after an error, click Continue with Google again.',
+        };
     }
 
     private function finalizeOAuthRedirect(Request $request, RedirectResponse $response): RedirectResponse
