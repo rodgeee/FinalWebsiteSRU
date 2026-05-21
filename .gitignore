@@ -24,3 +24,4 @@
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
 node_modules
+products-export.sql

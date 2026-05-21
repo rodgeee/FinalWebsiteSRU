@@ -29,7 +29,7 @@ COPY .env.docker-build .env
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
     APP_SECRET=build-time-secret \
-    DATABASE_URL="mysql://build:build@127.0.0.1:3306/build?serverVersion=8.0&charset=utf8mb4"
+    DATABASE_URL="mysql://build:build@127.0.0.1:3306/build?serverVersion=8.0.32&charset=utf8mb4"
 
 RUN mkdir -p config/jwt \
     && openssl genpkey -algorithm RSA -out config/jwt/private.pem -pkeyopt rsa_keygen_bits:4096 \
@@ -64,6 +64,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app /app
+
+# Runtime must use platform env (Railway), not the build-time .env file
+RUN rm -f /app/.env /app/.env.local /app/.env.local.php
 
 # Explicit var subdirs + ownership so PHP-FPM (www-data) can write cache/logs
 RUN mkdir -p /app/var/cache /app/var/log /app/var/cache/prod \
