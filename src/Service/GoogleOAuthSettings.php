@@ -47,17 +47,20 @@ final class GoogleOAuthSettings
     {
         if ($this->dotenvCache === null) {
             $this->dotenvCache = [];
-            $path = dirname(__DIR__, 2).'/.env';
-            if (!is_readable($path)) {
-                return '';
-            }
-            foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-                $line = trim($line);
-                if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) {
+            $root = dirname(__DIR__, 2);
+            foreach (['.env', '.env.local'] as $file) {
+                $path = $root.'/'.$file;
+                if (!is_readable($path)) {
                     continue;
                 }
-                [$key, $raw] = explode('=', $line, 2);
-                $this->dotenvCache[trim($key)] = trim($raw, " \t\"'");
+                foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                    $line = trim($line);
+                    if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) {
+                        continue;
+                    }
+                    [$key, $raw] = explode('=', $line, 2);
+                    $this->dotenvCache[trim($key)] = trim($raw, " \t\"'");
+                }
             }
         }
 

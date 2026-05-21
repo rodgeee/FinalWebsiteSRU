@@ -307,7 +307,6 @@
         <button type="submit" class="auth-button">Login</button>
       </form>
 
-      {% if google_login_enabled|default(false) %}
       <a
         href="{{ path('staff_login_google') }}"
         class="auth-google-button"
@@ -318,7 +317,6 @@
         </svg>
         Continue with Google
       </a>
-      {% endif %}
 
       <p class="auth-footer">
         Don't have an account?
