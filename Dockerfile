@@ -37,6 +37,14 @@ RUN mkdir -p config/jwt \
     && chmod 644 config/jwt/public.pem \
     && chmod 600 config/jwt/private.pem
 
+# Build frontend assets needed by the Symfony templates
+RUN npm install --no-progress \
+    && npm run build:tailwind \
+    && rm -rf node_modules package-lock.json \
+    && mkdir -p public/styles public/img \
+    && cp -R assets/styles/* public/styles/ \
+    && cp -R assets/img/* public/img/
+
 # --no-scripts: skip cache:clear (needs a live DB and full .env at build time)
 RUN composer install --no-interaction --no-dev --optimize-autoloader --no-ansi --no-scripts \
     && php bin/console importmap:install --no-interaction \
