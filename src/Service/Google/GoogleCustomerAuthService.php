@@ -45,11 +45,11 @@ final class GoogleCustomerAuthService
 
         if ($oauthAction === 'login') {
             return GoogleCustomerAuthResult::notRegistered(
-                'This Google account is not set up yet. Use Continue with Google on the Sign Up screen to create your account and receive a verification email.'
+                'This Google account is not set up yet. Use Continue with Google on the Sign Up screen to create your account.'
             );
         }
 
-        return $this->createUnverifiedCustomer($email, $fullName);
+        return $this->createVerifiedCustomer($email, $fullName);
     }
 
     private function handleExistingCustomer(
@@ -59,13 +59,9 @@ final class GoogleCustomerAuthService
         string $oauthAction,
     ): GoogleCustomerAuthResult {
         if (!$customer->isVerified()) {
-            if ($oauthAction === 'signup') {
-                return $this->resendVerificationEmail($customer, $email);
-            }
-
-            return GoogleCustomerAuthResult::unverifiedLogin(
-                'Please verify your email address before using Google sign-in. Check your inbox for the verification link.'
-            );
+            $customer->setIsVerified(true);
+            $customer->setVerificationToken(null);
+            $this->entityManager->flush();
         }
 
         if ($customer->getFullName() === null || $customer->getFullName() === '') {
@@ -98,71 +94,24 @@ final class GoogleCustomerAuthService
         return GoogleCustomerAuthResult::jwtReady($userForLogin);
     }
 
-    private function resendVerificationEmail(Customer $customer, string $email): GoogleCustomerAuthResult
-    {
-        $customer->setVerificationToken($this->emailVerificationService->generateVerificationToken());
-
-        $verificationUrl = $this->router->generate(
-            'app_verify_email',
-            ['token' => (string) $customer->getVerificationToken()],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
-
-        $this->entityManager->flush();
-
-        try {
-            $this->emailVerificationService->sendVerificationEmail($customer, $verificationUrl);
-
-            return GoogleCustomerAuthResult::unverifiedSignupResent(
-                'We sent you a new verification email. Verify it, then you can sign in.'
-            );
-        } catch (\Throwable $mailException) {
-            $this->logger->error('Google signup resend: verification email failed.', [
-                'email' => $email,
-                'exception_class' => $mailException::class,
-                'exception_message' => $mailException->getMessage(),
-            ]);
-
-            return GoogleCustomerAuthResult::unverifiedSignupResent(
-                'We could not send the verification email right now. Open this link to verify: ' . $verificationUrl
-            );
-        }
-    }
-
-    private function createUnverifiedCustomer(string $email, string $fullName): GoogleCustomerAuthResult
+    private function createVerifiedCustomer(string $email, string $fullName): GoogleCustomerAuthResult
     {
         $customer = new Customer();
         $customer->setFullName($fullName);
         $customer->setEmail($email);
         $customer->setRoles(['ROLE_CUSTOMER']);
-        $customer->setIsVerified(false);
-        $customer->setVerificationToken($this->emailVerificationService->generateVerificationToken());
+        $customer->setIsVerified(true);
+        $customer->setVerificationToken(null);
         $customer->setPassword($this->passwordHasher->hashPassword($customer, bin2hex(random_bytes(16))));
         $this->entityManager->persist($customer);
         $this->entityManager->flush();
 
-        $verificationUrl = $this->router->generate(
-            'app_verify_email',
-            ['token' => (string) $customer->getVerificationToken()],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
-
         try {
-            $this->emailVerificationService->sendVerificationEmail($customer, $verificationUrl);
-
-            return GoogleCustomerAuthResult::signupPending(
-                'We created your account with Google. Check your email to verify your address, then you can sign in with Google.'
-            );
-        } catch (\Throwable $mailException) {
-            $this->logger->error('Google signup: verification email failed.', [
-                'email' => $email,
-                'exception_class' => $mailException::class,
-                'exception_message' => $mailException->getMessage(),
-            ]);
-
-            return GoogleCustomerAuthResult::signupPending(
-                'Account created, but we could not send the verification email. Open this link to verify: ' . $verificationUrl
-            );
+            $this->userStatusChecker->checkPreAuth($customer);
+        } catch (CustomUserMessageAccountStatusException $e) {
+            return GoogleCustomerAuthResult::unverifiedLogin($e->getMessage());
         }
+
+        return GoogleCustomerAuthResult::jwtReady($customer);
     }
 }

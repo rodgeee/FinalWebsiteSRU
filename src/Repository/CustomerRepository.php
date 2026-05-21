@@ -26,6 +26,7 @@ class CustomerRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->where('LOWER(c.email) = :email')
             ->setParameter('email', $normalized)
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }

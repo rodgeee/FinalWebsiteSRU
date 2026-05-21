@@ -13,7 +13,13 @@ if [ -z "${APP_SECRET}" ]; then
     echo "WARNING: APP_SECRET is not set — set it in Railway Variables." >&2
     export APP_SECRET="unsafe-default-set-APP_SECRET-in-railway"
 fi
-export MAILER_DSN="${MAILER_DSN:-null://null}"
+# Empty MAILER_DSN on Railway ("") is not replaced by ${VAR:-default} — normalize explicitly.
+if [ -z "${MAILER_DSN}" ] || ! echo "${MAILER_DSN}" | grep -qE '^[a-zA-Z0-9.+_-]+://'; then
+    if [ -n "${MAILER_DSN}" ]; then
+        echo "WARNING: MAILER_DSN is invalid — using null://null. Set a full DSN (e.g. smtp://user:pass@host:587)." >&2
+    fi
+    export MAILER_DSN="null://null"
+fi
 export MAILER_FROM_ADDRESS="${MAILER_FROM_ADDRESS:-noreply@localhost}"
 export MAILER_FROM_NAME="${MAILER_FROM_NAME:-Shoes R Us}"
 export MESSENGER_TRANSPORT_DSN="${MESSENGER_TRANSPORT_DSN:-sync://}"
@@ -24,6 +30,18 @@ if [ -z "${DEFAULT_URI}" ] && [ -n "${RAILWAY_PUBLIC_DOMAIN}" ]; then
 fi
 export DEFAULT_URI="${DEFAULT_URI:-http://localhost}"
 export APP_ROOT_TO_ADMIN="${APP_ROOT_TO_ADMIN:-0}"
+
+export GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
+export GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET:-}"
+export GOOGLE_ANDROID_CLIENT_ID="${GOOGLE_ANDROID_CLIENT_ID:-}"
+export GOOGLE_IOS_CLIENT_ID="${GOOGLE_IOS_CLIENT_ID:-}"
+export APP_DEEP_LINK_SCHEME="${APP_DEEP_LINK_SCHEME:-vallejera}"
+if [ -z "${GOOGLE_CALLBACK_URL}" ] && [ -n "${DEFAULT_URI}" ]; then
+    export GOOGLE_CALLBACK_URL="${DEFAULT_URI}/connect/google/check"
+fi
+if [ -z "${GOOGLE_CLIENT_ID}" ] || [ -z "${GOOGLE_CLIENT_SECRET}" ]; then
+    echo "WARNING: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing — Google login will not work." >&2
+fi
 
 # Build DATABASE_URL from Railway MySQL (many variable naming conventions).
 resolve_database_url() {
@@ -90,6 +108,12 @@ quote_env() {
     echo "JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem"
     echo "JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem"
     echo "JWT_PASSPHRASE=\"$(quote_env "${JWT_PASSPHRASE}")\""
+    echo "GOOGLE_CLIENT_ID=\"$(quote_env "${GOOGLE_CLIENT_ID}")\""
+    echo "GOOGLE_CLIENT_SECRET=\"$(quote_env "${GOOGLE_CLIENT_SECRET}")\""
+    echo "GOOGLE_CALLBACK_URL=\"$(quote_env "${GOOGLE_CALLBACK_URL:-}")\""
+    echo "GOOGLE_ANDROID_CLIENT_ID=\"$(quote_env "${GOOGLE_ANDROID_CLIENT_ID}")\""
+    echo "GOOGLE_IOS_CLIENT_ID=\"$(quote_env "${GOOGLE_IOS_CLIENT_ID}")\""
+    echo "APP_DEEP_LINK_SCHEME=\"$(quote_env "${APP_DEEP_LINK_SCHEME}")\""
 } > /app/.env
 echo "Symfony .env file rebuilt for production."
 if echo "${MAILER_DSN}" | grep -qE '^null://'; then
@@ -227,7 +251,8 @@ run_post_deploy_tasks() {
     fi
 
     if [ "${LOAD_APP_FIXTURES:-0}" = "1" ]; then
-        echo "Loading application fixtures (AppFixtures)..."
+        echo "WARNING: LOAD_APP_FIXTURES=1 purges products, orders, and users on every deploy — unset after first load." >&2
+        echo "Loading application fixtures (FixtureLoader)..."
         run_console app:load-fixtures --no-interaction || true
     else
         run_console app:seed-demo-products --no-interaction || true

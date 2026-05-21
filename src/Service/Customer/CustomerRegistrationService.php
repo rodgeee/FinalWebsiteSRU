@@ -4,11 +4,9 @@ namespace App\Service\Customer;
 
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
-use App\Service\EmailVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class CustomerRegistrationService
@@ -20,8 +18,6 @@ final class CustomerRegistrationService
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly ValidatorInterface $validator,
-        private readonly EmailVerificationService $emailVerificationService,
-        private readonly UrlGeneratorInterface $urlGenerator,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -75,8 +71,8 @@ final class CustomerRegistrationService
         $customer->setEmail($email);
         $customer->setPlainPassword($password);
         $customer->setRoles(['ROLE_CUSTOMER']);
-        $customer->setIsVerified(false);
-        $customer->setVerificationToken($this->emailVerificationService->generateVerificationToken());
+        $customer->setIsVerified(true);
+        $customer->setVerificationToken(null);
 
         if ($shoeSize !== null && trim($shoeSize) !== '') {
             $customer->setShoeSize(trim($shoeSize));
@@ -110,23 +106,8 @@ final class CustomerRegistrationService
             return ['ok' => false, 'error' => 'Could not create account. Please try again.', 'field' => null];
         }
 
-        $verificationUrl = $this->urlGenerator->generate(
-            'app_verify_email',
-            ['token' => (string) $customer->getVerificationToken()],
-            UrlGeneratorInterface::ABSOLUTE_URL,
-        );
+        $message = 'Account created! You can sign in with your email and password.';
 
-        $message = 'Account created! We sent a verification email. Verify your address, then sign in with your email and password.';
-        try {
-            $this->emailVerificationService->sendVerificationEmail($customer, $verificationUrl);
-        } catch (\Throwable $e) {
-            $this->logger->error('Verification email failed after signup.', [
-                'email' => $email,
-                'exception' => $e->getMessage(),
-            ]);
-            $message = 'Account created, but we could not send the verification email right now. Use this link to verify: ' . $verificationUrl;
-        }
-
-        return ['ok' => true, 'message' => $message, 'verificationUrl' => $verificationUrl];
+        return ['ok' => true, 'message' => $message, 'verificationUrl' => null];
     }
 }

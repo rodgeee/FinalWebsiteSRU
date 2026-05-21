@@ -5,6 +5,7 @@ namespace App\Controller\Api\Customer;
 use App\Controller\Api\AbstractApiController;
 use App\Service\Api\ApiResponseFactory;
 use App\Service\Customer\CustomerRegistrationService;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,6 +16,7 @@ final class SignupController extends AbstractApiController
     public function __construct(
         ApiResponseFactory $api,
         private readonly CustomerRegistrationService $registrationService,
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct($api);
     }
@@ -27,15 +29,24 @@ final class SignupController extends AbstractApiController
             return $this->api->error('Invalid JSON body.', 400);
         }
 
-        $result = $this->registrationService->register(
-            firstName: (string) ($payload['firstName'] ?? ''),
-            lastName: (string) ($payload['lastName'] ?? ''),
-            email: (string) ($payload['email'] ?? ''),
-            password: (string) ($payload['password'] ?? ''),
-            middleName: isset($payload['middleName']) ? (string) $payload['middleName'] : null,
-            phoneNumber: isset($payload['phoneNumber']) ? (string) $payload['phoneNumber'] : null,
-            shoeSize: isset($payload['shoeSize']) ? (string) $payload['shoeSize'] : null,
-        );
+        try {
+            $result = $this->registrationService->register(
+                firstName: (string) ($payload['firstName'] ?? ''),
+                lastName: (string) ($payload['lastName'] ?? ''),
+                email: (string) ($payload['email'] ?? ''),
+                password: (string) ($payload['password'] ?? ''),
+                middleName: isset($payload['middleName']) ? (string) $payload['middleName'] : null,
+                phoneNumber: isset($payload['phoneNumber']) ? (string) $payload['phoneNumber'] : null,
+                shoeSize: isset($payload['shoeSize']) ? (string) $payload['shoeSize'] : null,
+            );
+        } catch (\Throwable $e) {
+            $this->logger->error('API customer signup failed.', [
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+
+            return $this->api->error('Could not create account. Please try again.', 500);
+        }
 
         if ($result['ok'] === false) {
             return $this->api->error($result['error'], 422, $result['field']);
