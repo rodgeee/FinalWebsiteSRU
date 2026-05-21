@@ -16,6 +16,10 @@ final class Version20251208130000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        if ($schema->hasTable('staff')) {
+            return;
+        }
+
         $this->addSql("CREATE TABLE staff (
             id INT AUTO_INCREMENT NOT NULL,
             full_name VARCHAR(255) NOT NULL,

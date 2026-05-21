@@ -112,6 +112,7 @@ wait_for_db() {
 if [ -n "${DATABASE_URL}" ]; then
     if wait_for_db; then
         echo "Running database migrations..."
+        run_console doctrine:migrations:sync-metadata-storage --no-interaction 2>/dev/null || true
         if ! run_console doctrine:migrations:migrate --no-interaction --allow-no-migration; then
             echo "WARNING: migrations failed — retrying once after short wait." >&2
             sleep 5

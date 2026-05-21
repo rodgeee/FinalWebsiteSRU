@@ -19,11 +19,24 @@ final class Version20251122133658 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE products DROP stocks');
-        $this->addSql('ALTER TABLE stocks ADD product_id INT NOT NULL, DROP products');
-        $this->addSql('ALTER TABLE stocks ADD CONSTRAINT FK_56F798054584665A FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE');
-        $this->addSql('CREATE INDEX IDX_56F798054584665A ON stocks (product_id)');
+        if ($schema->hasTable('products') && $schema->getTable('products')->hasColumn('stocks')) {
+            $this->addSql('ALTER TABLE products DROP stocks');
+        }
+
+        if (!$schema->hasTable('stocks')) {
+            return;
+        }
+
+        $stocks = $schema->getTable('stocks');
+        if (!$stocks->hasColumn('product_id')) {
+            if ($stocks->hasColumn('products')) {
+                $this->addSql('ALTER TABLE stocks ADD product_id INT NOT NULL, DROP products');
+            } else {
+                $this->addSql('ALTER TABLE stocks ADD product_id INT NOT NULL');
+            }
+            $this->addSql('ALTER TABLE stocks ADD CONSTRAINT FK_56F798054584665A FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE');
+            $this->addSql('CREATE INDEX IDX_56F798054584665A ON stocks (product_id)');
+        }
     }
 
     public function down(Schema $schema): void
