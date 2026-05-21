@@ -41,8 +41,9 @@ if ! run_console cache:warmup; then
     run_console cache:clear || true
 fi
 
-chown -R www-data:www-data var/cache var/log 2>/dev/null || true
-chmod -R 775 var/cache var/log 2>/dev/null || true
+mkdir -p var/sessions
+chown -R www-data:www-data var/cache var/log var/sessions 2>/dev/null || true
+chmod -R 775 var/cache var/log var/sessions 2>/dev/null || true
 
 if [ -n "${DATABASE_URL}" ]; then
     echo "Running database migrations..."

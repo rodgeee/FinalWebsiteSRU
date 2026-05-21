@@ -70,7 +70,7 @@ COPY .env.docker-build /app/.env
 RUN rm -f /app/.env.local /app/.env.local.php
 
 # Explicit var subdirs + ownership so PHP-FPM (www-data) can write cache/logs
-RUN mkdir -p /app/var/cache /app/var/log /app/var/cache/prod \
+RUN mkdir -p /app/var/cache /app/var/log /app/var/cache/prod /app/var/sessions \
     && chown -R www-data:www-data /app/var \
     && chmod -R 775 /app/var
 

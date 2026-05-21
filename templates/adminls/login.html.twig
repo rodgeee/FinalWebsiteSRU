@@ -270,10 +270,12 @@
 
       {% if error %}
         <div class="auth-alert">
-          {% if error.messageKey is defined %}
+          {% if error.messageKey is defined and error.messageKey %}
             {{ error.messageKey|trans(error.messageData, 'security') }}
+          {% elseif error.message is defined and error.message %}
+            {{ error.message }}
           {% else %}
-            {{ error }}
+            Invalid email or password.
           {% endif %}
         </div>
       {% endif %}

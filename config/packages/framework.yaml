@@ -36,6 +36,8 @@ when@prod:
     framework:
         # Railway / load balancers: allow any host (health checks use 127.0.0.1, public URL, etc.)
         trusted_hosts: ['^.*$']
+        session:
+            save_path: '%kernel.project_dir%/var/sessions'
 
 when@test:
     framework:
