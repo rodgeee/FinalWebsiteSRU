@@ -5,10 +5,8 @@ PORT="${PORT:-80}"
 sed -i "s/__PORT__/${PORT}/g" /etc/nginx/conf.d/symfony.conf
 echo "Nginx will listen on port ${PORT}"
 
-# Keep /app/.env (required by Symfony); remove local overrides only
 rm -f /app/.env.local /app/.env.local.php
 
-# Railway/OS variables override .env defaults (Symfony does not replace existing env vars)
 export APP_ENV="${APP_ENV:-prod}"
 export APP_DEBUG="${APP_DEBUG:-0}"
 if [ -z "${APP_SECRET}" ]; then
@@ -17,6 +15,7 @@ if [ -z "${APP_SECRET}" ]; then
 fi
 export MAILER_DSN="${MAILER_DSN:-null://null}"
 export MAILER_FROM_ADDRESS="${MAILER_FROM_ADDRESS:-noreply@localhost}"
+export MAILER_FROM_NAME="${MAILER_FROM_NAME:-Shoes R' Us}"
 export MESSENGER_TRANSPORT_DSN="${MESSENGER_TRANSPORT_DSN:-sync://}"
 export CORS_ALLOW_ORIGIN="${CORS_ALLOW_ORIGIN:-^.*$}"
 export JWT_PASSPHRASE="${JWT_PASSPHRASE:-}"
@@ -26,15 +25,41 @@ fi
 export DEFAULT_URI="${DEFAULT_URI:-http://localhost}"
 export APP_ROOT_TO_ADMIN="${APP_ROOT_TO_ADMIN:-0}"
 
-# Railway MySQL plugin exposes MYSQL_URL; Symfony expects DATABASE_URL (not localhost).
-if [ -n "${MYSQL_URL}" ]; then
-    export DATABASE_URL="${MYSQL_URL}"
-elif echo "${DATABASE_URL:-}" | grep -qE '@(127\.0\.0\.1|localhost)([:/]|$)'; then
-    echo "ERROR: DATABASE_URL points to localhost — MySQL is not in this container." >&2
-    echo "  Fix: Railway → MySQL service → Connect → copy URL → app Variables → DATABASE_URL" >&2
-    echo "  Or link the MySQL service so MYSQL_URL appears on this app." >&2
-    unset DATABASE_URL
-fi
+# Build DATABASE_URL from Railway MySQL (many variable naming conventions).
+resolve_database_url() {
+    if [ -n "${MYSQL_URL}" ]; then
+        export DATABASE_URL="${MYSQL_URL}"
+        return 0
+    fi
+    if [ -n "${MYSQL_PRIVATE_URL}" ]; then
+        export DATABASE_URL="${MYSQL_PRIVATE_URL}"
+        return 0
+    fi
+    if [ -n "${DATABASE_URL}" ] && ! echo "${DATABASE_URL}" | grep -qE '@(127\.0\.0\.1|localhost)([:/]|$)'; then
+        return 0
+    fi
+    local host="${MYSQLHOST:-${MYSQL_HOST:-${PGHOST:-}}}"
+    local port="${MYSQLPORT:-${MYSQL_PORT:-${PGPORT:-3306}}}"
+    local user="${MYSQLUSER:-${MYSQL_USER:-${PGUSER:-}}}"
+    local pass="${MYSQLPASSWORD:-${MYSQL_PASSWORD:-${PGPASSWORD:-}}}"
+    local db="${MYSQLDATABASE:-${MYSQL_DATABASE:-${PGDATABASE:-}}}"
+    if [ -n "${host}" ] && [ -n "${user}" ] && [ -n "${db}" ]; then
+        local enc_user enc_pass
+        enc_user=$(php -r 'echo rawurlencode($argv[1]);' "${user}")
+        enc_pass=$(php -r 'echo rawurlencode($argv[1]);' "${pass}")
+        export DATABASE_URL="mysql://${enc_user}:${enc_pass}@${host}:${port}/${db}"
+        echo "Built DATABASE_URL from Railway MySQL variables (host=${host})."
+        return 0
+    fi
+    if echo "${DATABASE_URL:-}" | grep -qE '@(127\.0\.0\.1|localhost)([:/]|$)'; then
+        echo "ERROR: DATABASE_URL points to localhost — link the MySQL service on Railway." >&2
+        unset DATABASE_URL
+    fi
+    return 1
+}
+
+resolve_database_url || true
+
 if [ -n "${DATABASE_URL}" ] && ! echo "${DATABASE_URL}" | grep -q 'serverVersion='; then
     if echo "${DATABASE_URL}" | grep -q '?'; then
         export DATABASE_URL="${DATABASE_URL}&serverVersion=8.0.32&charset=utf8mb4"
@@ -42,11 +67,11 @@ if [ -n "${DATABASE_URL}" ] && ! echo "${DATABASE_URL}" | grep -q 'serverVersion
         export DATABASE_URL="${DATABASE_URL}?serverVersion=8.0.32&charset=utf8mb4"
     fi
 fi
-# Rebuild .env so Symfony never sees invalid lines (e.g. APP_SECRET pasted with spaces/comments).
+
 if echo "${APP_SECRET}" | grep -q '[[:space:]]'; then
     echo "ERROR: APP_SECRET must be one random string with NO spaces or comments." >&2
-    echo "  In Railway Variables, use only hex characters, e.g. a7f3c9e2b1d84f6a0e5c8b2d9f1a4e7c" >&2
 fi
+
 quote_env() {
     printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
@@ -58,6 +83,7 @@ quote_env() {
     [ -n "${DATABASE_URL}" ] && echo "DATABASE_URL=\"$(quote_env "${DATABASE_URL}")\""
     echo "MAILER_DSN=\"$(quote_env "${MAILER_DSN}")\""
     echo "MAILER_FROM_ADDRESS=\"$(quote_env "${MAILER_FROM_ADDRESS}")\""
+    echo "MAILER_FROM_NAME=\"$(quote_env "${MAILER_FROM_NAME}")\""
     echo "MESSENGER_TRANSPORT_DSN=\"$(quote_env "${MESSENGER_TRANSPORT_DSN}")\""
     echo "CORS_ALLOW_ORIGIN=\"$(quote_env "${CORS_ALLOW_ORIGIN}")\""
     echo "DEFAULT_URI=\"$(quote_env "${DEFAULT_URI}")\""
@@ -66,42 +92,76 @@ quote_env() {
     echo "JWT_PASSPHRASE=\"$(quote_env "${JWT_PASSPHRASE}")\""
 } > /app/.env
 echo "Symfony .env file rebuilt for production."
+if echo "${MAILER_DSN}" | grep -qE '^null://'; then
+    echo "WARNING: MAILER_DSN is null://null — verification emails will NOT be delivered. Set MAILER_DSN (SMTP) in Railway Variables." >&2
+fi
+
+if [ -n "${DATABASE_URL}" ]; then
+    echo "Database target: $(php -r 'echo parse_url($argv[1], PHP_URL_HOST) ?: "unknown";' "${DATABASE_URL}")"
+else
+    echo "WARNING: DATABASE_URL is not set — link MySQL to this service on Railway." >&2
+fi
 
 run_console() {
     php bin/console "$@" --env="${APP_ENV}" --no-debug
 }
 
 echo "Clearing Symfony cache..."
-if ! run_console cache:clear; then
-    echo "WARNING: cache:clear failed — continuing startup." >&2
-fi
+run_console cache:clear || echo "WARNING: cache:clear failed — continuing." >&2
 
 echo "Warming up Symfony cache..."
-if ! run_console cache:warmup; then
-    echo "WARNING: cache:warmup failed — running cache:clear again." >&2
-    run_console cache:clear || true
-fi
+run_console cache:warmup || run_console cache:clear || true
 
 mkdir -p var/sessions
 chown -R www-data:www-data var/cache var/log var/sessions 2>/dev/null || true
 chmod -R 775 var/cache var/log var/sessions 2>/dev/null || true
 
-# Wait for DB helper: tries to connect using PHP PDO (uses DATABASE_URL)
+# PHP CLI often cannot read DATABASE_URL via getenv() (variables_order); pass URL as argv[1].
+test_db_connection() {
+    php -r '
+$url = $argv[1] ?? "";
+if ($url === "") {
+    fwrite(STDERR, "missing database url argument");
+    exit(2);
+}
+$p = parse_url($url);
+if ($p === false || empty($p["host"])) {
+    fwrite(STDERR, "invalid database url");
+    exit(2);
+}
+$host = $p["host"];
+$port = $p["port"] ?? 3306;
+$user = $p["user"] ?? null;
+$pass = $p["pass"] ?? null;
+$dsn = "mysql:host={$host};port={$port};charset=utf8mb4";
+try {
+    $pdo = new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_TIMEOUT => 5,
+    ]);
+    $pdo->query("SELECT 1");
+    echo "ok";
+} catch (Throwable $e) {
+    fwrite(STDERR, $e->getMessage());
+    exit(1);
+}
+' "$DATABASE_URL"
+}
+
 wait_for_db() {
     if [ -z "${DATABASE_URL}" ]; then
         return 1
     fi
     echo "Waiting for database to become available..."
-    retries=20
-    delay=3
+    retries=8
+    delay=2
     while [ $retries -gt 0 ]; do
-        php -r "try { \$url=getenv('DATABASE_URL'); if (!\$url) exit(2); \$p=parse_url(\$url); if (!isset(\$p['host'])) exit(2); \$host=\$p['host']; \$port=(isset(\$p['port'])?\$p['port']:3306); \$user=isset(\$p['user'])?\$p['user']:null; \$pass=isset(\$p['pass'])?\$p['pass']:null; \$dsn='mysql:host='.\$host.';port='.\$port.';charset=utf8mb4'; \$pdo=new PDO(\$dsn,\$user,\$pass,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_TIMEOUT=>5]); \$pdo->query('SELECT 1'); echo 'ok'; } catch (Exception \$e) { fwrite(STDERR, \$e->getMessage()); exit(1);}"
-        rc=$?
-        if [ $rc -eq 0 ]; then
+        err=$(test_db_connection 2>&1) && rc=0 || rc=$?
+        if [ "$rc" -eq 0 ]; then
             echo "Database ready"
             return 0
         fi
-        echo "DB not ready yet (exit $rc), sleeping $delay s..."
+        echo "DB not ready yet (exit ${rc}${err:+: ${err}}), sleeping ${delay}s..."
         retries=$((retries-1))
         sleep $delay
     done
@@ -109,55 +169,57 @@ wait_for_db() {
     return 1
 }
 
-if [ -n "${DATABASE_URL}" ]; then
-    if wait_for_db; then
-        echo "Running database migrations..."
-        run_console doctrine:migrations:sync-metadata-storage --no-interaction 2>/dev/null || true
-        if ! run_console doctrine:migrations:migrate --no-interaction --allow-no-migration; then
-            echo "WARNING: migrations failed — retrying once after short wait." >&2
-            sleep 5
-            if ! run_console doctrine:migrations:migrate --no-interaction --allow-no-migration; then
-                echo "WARNING: migrations failed — check DATABASE_URL and MySQL connectivity." >&2
-            else
-                echo "Verifying staff accounts can log in..."
-                run_console app:verify-staff-for-login --no-interaction || true
-            fi
-        else
-            echo "Verifying staff accounts can log in..."
-            run_console app:verify-staff-for-login --no-interaction || true
-        fi
-
-        bootstrap_email="${BOOTSTRAP_ADMIN_EMAIL:-}"
-        bootstrap_password="${BOOTSTRAP_ADMIN_PASSWORD:-}"
-        if [ "${ENSURE_DEFAULT_ADMIN:-0}" = "1" ]; then
-            bootstrap_email="${bootstrap_email:-admin@shoesrus.local}"
-        fi
-        if [ -n "${bootstrap_email}" ] && [ -n "${bootstrap_password}" ]; then
-            echo "Ensuring admin login account (${bootstrap_email})..."
-            run_console app:create-admin \
-                --email="${bootstrap_email}" \
-                --password="${bootstrap_password}" \
-                --full-name="System Admin" \
-                --no-interaction || true
-        fi
-
-        import_file="${DATABASE_IMPORT_FILE:-/app/data/railway-import.sql}"
-        if [ -f "${import_file}" ]; then
-            echo "Importing database dump (${import_file}) when catalog is empty..."
-            run_console app:import-mysql-dump "${import_file}" --only-if-empty --no-interaction || true
-        fi
-
-        echo "Ensuring storefront catalog has products (demo seed if empty)..."
-        run_console app:seed-demo-products --no-interaction || true
-    else
-        echo "WARNING: DATABASE_URL present but DB unreachable — skipping migrations." >&2
+run_post_deploy_tasks() {
+    if [ -z "${DATABASE_URL}" ]; then
+        echo "WARNING: DATABASE_URL is not set — skipping migrations and seed." >&2
+        return 0
     fi
-else
-    echo "WARNING: DATABASE_URL is not set — skipping migrations and product seed." >&2
-fi
+    if ! wait_for_db; then
+        echo "WARNING: database unreachable — skipping migrations (app will still run)." >&2
+        return 0
+    fi
 
+    echo "Running database migrations..."
+    run_console doctrine:migrations:sync-metadata-storage --no-interaction 2>/dev/null || true
+    if ! run_console doctrine:migrations:migrate --no-interaction --allow-no-migration; then
+        echo "WARNING: migrations failed — retrying once." >&2
+        sleep 3
+        run_console doctrine:migrations:migrate --no-interaction --allow-no-migration || true
+    fi
+
+    run_console app:verify-staff-for-login --no-interaction || true
+
+    bootstrap_email="${BOOTSTRAP_ADMIN_EMAIL:-}"
+    bootstrap_password="${BOOTSTRAP_ADMIN_PASSWORD:-}"
+    if [ "${ENSURE_DEFAULT_ADMIN:-0}" = "1" ]; then
+        bootstrap_email="${bootstrap_email:-admin@shoesrus.local}"
+    fi
+    if [ -n "${bootstrap_email}" ] && [ -n "${bootstrap_password}" ]; then
+        echo "Ensuring admin login account (${bootstrap_email})..."
+        run_console app:create-admin \
+            --email="${bootstrap_email}" \
+            --password="${bootstrap_password}" \
+            --full-name="System Admin" \
+            --no-interaction || true
+    fi
+
+    import_file="${DATABASE_IMPORT_FILE:-/app/data/railway-import.sql}"
+    if [ -f "${import_file}" ]; then
+        run_console app:import-mysql-dump "${import_file}" --only-if-empty --no-interaction || true
+    fi
+
+    if [ "${LOAD_APP_FIXTURES:-0}" = "1" ]; then
+        echo "Loading application fixtures (AppFixtures)..."
+        run_console app:load-fixtures --no-interaction || true
+    else
+        run_console app:seed-demo-products --no-interaction || true
+    fi
+}
+
+# Start web stack first so Railway health checks pass, then run DB tasks in background.
 echo "Starting PHP-FPM..."
 php-fpm -D
 
-echo "Starting Nginx..."
+echo "Starting Nginx (migrations run in background)..."
+run_post_deploy_tasks &
 exec nginx -g "daemon off;"

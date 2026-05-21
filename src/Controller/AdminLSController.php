@@ -112,7 +112,7 @@ final class AdminLSController extends AbstractController
                         $entityManager->flush();
 
                         // Use PRG pattern with flash message; redirect to login page (303 for POST → GET)
-                        $this->addFlash('success', 'Account created successfully! You can now log in.');
+                        $this->addFlash('success', 'Admin account created successfully. You can log in now — admin accounts do not require email verification.');
                         return $this->redirectToRoute('adminls_login', [], Response::HTTP_SEE_OTHER);
                     } catch (\Throwable $e) {
                         $error = 'Failed to create account. Please try again later.';

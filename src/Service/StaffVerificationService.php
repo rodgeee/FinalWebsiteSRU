@@ -39,13 +39,12 @@ final class StaffVerificationService
         return $token;
     }
 
-    public function sendVerificationEmail(Staff $staff, string $verificationUrl): void
+    /**
+     * @return bool true when the message was handed to the mail transport
+     */
+    public function sendVerificationEmail(Staff $staff, string $verificationUrl): bool
     {
         $to = (string) $staff->getEmail();
-
-        $this->logger->info('Sending staff verification email.', [
-            'to' => $to,
-        ]);
 
         $email = (new TemplatedEmail())
             ->from(new Address($this->fromAddress, $this->fromName))
@@ -54,12 +53,23 @@ final class StaffVerificationService
             ->htmlTemplate('emails/verification.html.twig')
             ->textTemplate('emails/verification.txt.twig')
             ->context([
-                // Reuse existing templates: they only require customer.fullName + verificationUrl.
                 'customer' => $staff,
                 'verificationUrl' => $verificationUrl,
             ]);
 
-        $this->mailer->send($email);
+        try {
+            $this->mailer->send($email);
+            $this->logger->info('Staff verification email sent.', ['to' => $to]);
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->logger->error('Staff verification email failed.', [
+                'to' => $to,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 
     public function verifyToken(string $token): ?Staff

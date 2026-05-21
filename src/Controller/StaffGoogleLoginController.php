@@ -254,9 +254,11 @@ final class StaffGoogleLoginController extends AbstractController
                 ['token' => $verificationToken],
                 UrlGeneratorInterface::ABSOLUTE_URL
             );
-            $staffVerificationService->sendVerificationEmail($staff, $verificationUrl);
-
-            $this->addFlash('error', 'Please verify your email address before logging in. We sent you a verification link.');
+            if ($staffVerificationService->sendVerificationEmail($staff, $verificationUrl)) {
+                $this->addFlash('error', 'Please verify your email address before logging in. We sent you a verification link.');
+            } else {
+                $this->addFlash('error', 'Please verify your email before logging in. Email could not be sent — use this link: '.$verificationUrl);
+            }
 
             return $this->finalizeOAuthRedirect($request, $this->redirectToRoute('adminls_login'));
         }

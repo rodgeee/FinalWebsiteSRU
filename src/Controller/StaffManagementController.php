@@ -136,7 +136,7 @@ final class StaffManagementController extends AbstractController
                 $entityManager->persist($admin);
                 $entityManager->flush();
 
-                $this->addFlash('success', 'Admin account created.');
+                $this->addFlash('success', 'Admin account created. They can log in immediately — admin accounts do not use email verification.');
                 $activityLogger->log(
                     'create',
                     'admin',
@@ -165,9 +165,13 @@ final class StaffManagementController extends AbstractController
                     ['token' => $verificationToken],
                     UrlGeneratorInterface::ABSOLUTE_URL
                 );
-                $staffVerificationService->sendVerificationEmail($staff, $verificationUrl);
+                $emailSent = $staffVerificationService->sendVerificationEmail($staff, $verificationUrl);
 
-                $this->addFlash('success', 'Staff account created. Please verify the email sent to the staff account before they can log in.');
+                if ($emailSent) {
+                    $this->addFlash('success', 'Staff account created. A verification email was sent — they must verify before logging in.');
+                } else {
+                    $this->addFlash('warning', 'Staff account created, but the verification email could not be sent. Configure MAILER_DSN on Railway (SMTP). They can verify using this link: '.$verificationUrl);
+                }
                 $activityLogger->log(
                     'create',
                     'staff',
@@ -249,7 +253,9 @@ final class StaffManagementController extends AbstractController
                             ['token' => (string) $staff->getVerificationToken()],
                             UrlGeneratorInterface::ABSOLUTE_URL
                         );
-                        $staffVerificationService->sendVerificationEmail($staff, $verificationUrl);
+                        if (!$staffVerificationService->sendVerificationEmail($staff, $verificationUrl)) {
+                            $this->addFlash('warning', 'Could not send verification email (check MAILER_DSN). Verification link: '.$verificationUrl);
+                        }
 
                         $staff->setStatus('disabled');
                         $staff->setIsActive(false);
