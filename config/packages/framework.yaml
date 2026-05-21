@@ -11,6 +11,7 @@ framework:
         - '^127\\.0\\.0\\.1(?::\\d+)?$'
         - '^localhost(?::\\d+)?$'
         - '^.+\\.ngrok(-free)?\\.(app|dev)(?::\\d+)?$'
+        - '^.+\\.up\\.railway\\.app$'
     # Honor forwarded headers so generated URLs/forms use https behind ngrok.
     trusted_headers: [forwarded, x-forwarded-for, x-forwarded-host, x-forwarded-proto, x-forwarded-port, x-forwarded-prefix]
     # Help Symfony generate HTTPS URLs when behind a proxy/SSL terminator.
