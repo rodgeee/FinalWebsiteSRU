@@ -1,0 +1,24 @@
+{# Shared public site navigation — expects current_route for active states (optional) #}
+<header class="pub-nav">
+  <div class="pub-nav__inner">
+    <a href="{{ path('app_landingpage_legacy') }}" class="pub-nav__logo-link" aria-label="Shoes R' Us home">
+      <img src="{{ asset('img/shoes-r-us-logo.png') }}" alt="" class="pub-nav__logo" width="120" height="auto"/>
+    </a>
+    <nav class="pub-nav__links" aria-label="Main">
+      <a href="{{ path('app_landingpage_legacy') }}" class="pub-nav__link{{ current_route|default('') == 'app_landingpage_legacy' ? ' is-active' : '' }}">Home</a>
+      <a href="{{ path('app_landingpage_legacy') }}" class="pub-nav__link">Shop</a>
+    </nav>
+    <div class="pub-nav__auth">
+      {% if is_granted('ROLE_CUSTOMER') %}
+        <a href="{{ path('customer_account') }}" class="pub-nav__link">Account</a>
+        <form class="pub-nav__logout-form" method="post" action="{{ path('customer_logout') }}" data-turbo="false">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token('customer_logout') }}">
+          <button type="submit" class="pub-nav__logout">Log out</button>
+        </form>
+      {% else %}
+        <a href="{{ path('customer_login') }}" class="pub-nav__link">Log in</a>
+        <a href="{{ path('customer_signup') }}" class="pub-nav__btn pub-nav__btn--primary">Sign up</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

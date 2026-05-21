@@ -1,0 +1,469 @@
+/* Customer account / profile — templates/customer/account.html.twig */
+
+body.lp-account-page {
+    background: #fff;
+    color: #0f172a;
+    font-family: var(--lp-font-body, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+}
+
+.lp-account {
+    --lp-account-navy: var(--sr-brand, #0044cc);
+    --lp-account-muted: rgba(15, 23, 42, 0.55);
+    --lp-account-rule: rgba(15, 23, 42, 0.18);
+    --lp-account-gutter-x: clamp(24px, 4vw, 48px);
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    box-sizing: border-box;
+    padding-top: clamp(2rem, 5vw, 3.5rem);
+    padding-bottom: clamp(4rem, 8vw, 6rem);
+    padding-left: max(var(--lp-account-gutter-x), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--lp-account-gutter-x), env(safe-area-inset-right, 0px));
+}
+
+.lp-account__hello {
+    margin: 0 0 0.75rem;
+    font-family: var(--lp-font-display, "Sora", sans-serif);
+    font-size: clamp(2.25rem, 5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    color: var(--lp-account-navy);
+    text-transform: uppercase;
+}
+
+.lp-account__intro {
+    margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+    max-width: 52rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #111827;
+}
+
+.lp-account__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1.35rem;
+    margin: 0 0 clamp(2rem, 4vw, 2.75rem);
+    padding: 0 0 0.15rem;
+    border: none;
+    list-style: none;
+}
+
+.lp-account__nav a,
+.lp-account__nav button.lp-account__nav-signout {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--lp-account-muted);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.lp-account__nav a:hover,
+.lp-account__nav a:focus-visible,
+.lp-account__nav button.lp-account__nav-signout:hover,
+.lp-account__nav button.lp-account__nav-signout:focus-visible {
+    color: #0f172a;
+    outline: none;
+}
+
+.lp-account__nav a.is-active {
+    color: var(--lp-account-navy);
+    font-weight: 800;
+}
+
+.lp-account__panel {
+    display: none;
+}
+
+.lp-account__panel.is-active {
+    display: block;
+}
+
+.lp-account__panel-lead {
+    margin: 0 0 clamp(1.5rem, 3vw, 2rem);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #111827;
+}
+
+.lp-account__placeholder {
+    margin: 0;
+    padding: 2rem 0;
+    font-size: 0.9rem;
+    color: var(--lp-account-muted);
+}
+
+.lp-account-form__row {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    margin-bottom: clamp(1.25rem, 3vw, 2rem);
+}
+
+.lp-account-form__row--3 {
+    grid-template-columns: minmax(5.5rem, 7rem) 1fr 1fr;
+}
+
+.lp-account-form__row--2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.lp-account-form__row--dob {
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+}
+
+.lp-account-form__field {
+    min-width: 0;
+}
+
+.lp-account-form__field label,
+.lp-account-form__legend {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #111827;
+}
+
+.lp-account-form__legend {
+    margin-bottom: 0.65rem;
+}
+
+.lp-account-form__input,
+.lp-account-form__select {
+    display: block;
+    width: 100%;
+    padding: 0.35rem 0 0.55rem;
+    border: 0;
+    border-bottom: 1px solid var(--lp-account-rule);
+    border-radius: 0;
+    background: transparent;
+    font-size: 0.88rem;
+    color: #0f172a;
+    appearance: none;
+    transition: border-color 0.15s ease;
+}
+
+.lp-account-form__select {
+    padding-right: 1.25rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%230f172a' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.15rem center;
+    cursor: pointer;
+}
+
+.lp-account-form__input:focus,
+.lp-account-form__select:focus {
+    outline: none;
+    border-bottom-color: var(--lp-account-navy);
+}
+
+.lp-account-form__input::placeholder {
+    color: rgba(15, 23, 42, 0.35);
+}
+
+.lp-account-form__phone {
+    display: grid;
+    grid-template-columns: minmax(4.5rem, 5.5rem) 1fr;
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.lp-account-form__dob {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+}
+
+.lp-account-form__actions {
+    margin-top: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.lp-account-form__save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 7.5rem;
+    padding: 0.85rem 2rem;
+    border: 0;
+    border-radius: 0;
+    background: var(--lp-account-navy);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.lp-account-form__save:hover {
+    background: var(--sr-brand-dark, #003399);
+}
+
+.lp-account-form__save:active {
+    transform: translateY(1px);
+}
+
+.lp-account-flash {
+    margin: 0 0 1.25rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    border-left: 3px solid var(--lp-account-navy);
+    background: var(--sr-brand-soft, rgba(0, 68, 204, 0.08));
+    color: #0f172a;
+}
+
+.lp-account-flash--error {
+    border-left-color: #b91c1c;
+    background: #fef2f2;
+    color: #7f1d1d;
+}
+
+/* Address tab */
+.lp-account-addresses {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.lp-account-address-card {
+    width: 100%;
+    max-width: 32rem;
+    border: 1px solid rgba(0, 68, 204, 0.35);
+    padding: 1.45rem 1.35rem 1.5rem;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.lp-account-address-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.15rem;
+}
+
+.lp-account-address-card__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.65rem;
+    min-width: 0;
+}
+
+.lp-account-address-card__label {
+    margin: 0;
+    font-family: var(--lp-font-display, "Sora", sans-serif);
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--lp-account-navy);
+}
+
+.lp-account-address-card__divider {
+    color: rgba(15, 23, 42, 0.35);
+    font-weight: 400;
+    user-select: none;
+}
+
+.lp-account-address-card__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    background: var(--lp-account-navy);
+    color: #fff;
+    font-size: 0.58rem;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+.lp-account-address-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.lp-account-address-card__delete-form {
+    margin: 0;
+    display: inline;
+}
+
+.lp-account-address-card__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0f172a;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.lp-account-address-card__icon-btn svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.lp-account-address-card__icon-btn:hover,
+.lp-account-address-card__icon-btn:focus-visible {
+    color: var(--lp-account-navy);
+    outline: none;
+}
+
+.lp-account-address-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.lp-account-address-card__line {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: #111827;
+    max-width: 28rem;
+}
+
+.lp-account-addresses__footer {
+    margin-top: 0.25rem;
+}
+
+.lp-account-addresses__add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.75rem;
+    background: var(--lp-account-navy);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.lp-account-addresses__add:hover {
+    background: var(--sr-brand-dark, #003399);
+    color: #fff;
+}
+
+.lp-account-address-form-wrap {
+    width: 100%;
+    max-width: 32rem;
+    margin-top: 1.75rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--lp-account-rule);
+    box-sizing: border-box;
+}
+
+.lp-account-address-form__title {
+    margin: 0 0 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lp-account-navy);
+}
+
+.lp-account-address-form__check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    font-size: 0.78rem;
+    color: #111827;
+    cursor: pointer;
+}
+
+.lp-account-address-form__check input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--lp-account-navy);
+}
+
+.lp-account-address-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lp-account-address-form__cancel {
+    font-size: 0.78rem;
+    color: var(--lp-account-muted);
+    text-decoration: none;
+}
+
+.lp-account-address-form__cancel:hover {
+    color: var(--lp-account-navy);
+}
+
+.lp-account-orders {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--lp-account-rule);
+}
+
+.lp-account-orders__item {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--lp-account-rule);
+}
+
+.lp-account-orders__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.35rem;
+}
+
+.lp-account-orders__status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.lp-account-orders__meta {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--lp-account-muted);
+}
+
+@media (max-width: 768px) {
+    .lp-account-form__row--3,
+    .lp-account-form__row--2,
+    .lp-account-form__row--dob {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-account-form__dob {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .lp-account__nav {
+        gap: 0.5rem 0.85rem;
+    }
+}

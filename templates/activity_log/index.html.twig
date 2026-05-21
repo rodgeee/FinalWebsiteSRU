@@ -1,0 +1,144 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Activity Log • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[1200px] space-y-5">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[3px] text-textMuted">Audit trail</p>
+      <h1 class="text-2xl font-semibold">Activity Log</h1>
+      <p class="text-sm text-textMuted">See who added, changed, or removed data.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{{ path('app_dashboard') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all" title="Return to dashboard">
+        <i data-lucide="layout-dashboard" class="h-5 w-5"></i>
+        Dashboard
+      </a>
+      <form method="post" action="{{ path('admin_activity_log_clear') }}" onsubmit="return confirm('Clear all activity logs? This cannot be undone.') && confirm('Are you sure you want to delete all activity log?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('clear_activity_log') }}">
+        <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 transition" title="Clear all activity logs">
+          <i data-lucide="trash-2" class="h-5 w-5"></i>
+          Clear log
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <form method="get" action="{{ path('admin_activity_log') }}" class="grid gap-3 md:grid-cols-6 items-end rounded-xl border border-border bg-white p-4 shadow-card">
+    <div>
+      <label class="text-xs font-semibold uppercase tracking-[2px] text-textMuted">Action</label>
+      <select name="action" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand">
+        {% set actions = ['','create','update','delete','login','logout'] %}
+        {% for value in actions %}
+          <option value="{{ value }}" {{ value == filters.action ? 'selected' : '' }}>
+            {{ value == '' ? 'All actions' : value|capitalize }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="text-xs font-semibold uppercase tracking-[2px] text-textMuted">Entity</label>
+      <select name="entity" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand">
+        {% set entities = ['','auth','staff','stock','product','order','service','profile'] %}
+        {% for value in entities %}
+          <option value="{{ value }}" {{ value == filters.entity ? 'selected' : '' }}>
+            {{ value == '' ? 'All areas' : value|capitalize }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="text-xs font-semibold uppercase tracking-[2px] text-textMuted">User (email or name)</label>
+      <input type="search" name="user" value="{{ filters.user|default('') }}" placeholder="someone@example.com" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand" />
+    </div>
+    <div>
+      <label class="text-xs font-semibold uppercase tracking-[2px] text-textMuted">From</label>
+      <input type="date" name="from" value="{{ filters.from|default('') }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand" />
+    </div>
+    <div>
+      <label class="text-xs font-semibold uppercase tracking-[2px] text-textMuted">To</label>
+      <input type="date" name="to" value="{{ filters.to|default('') }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand" />
+    </div>
+    <div class="flex gap-2">
+      <div class="flex-1">
+        <label class="text-xs font-semibold uppercase tracking-[2px] text-textMuted">Limit</label>
+        <input type="number" min="10" max="500" step="10" name="limit" value="{{ filters.limit }}" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand" />
+      </div>
+      <button type="submit" class="self-end rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-card hover:shadow-lg transition">Apply</button>
+    </div>
+    <div class="md:col-span-6">
+      <label class="text-xs font-semibold uppercase tracking-[2px] text-textMuted">Search</label>
+      <input type="search" name="q" value="{{ filters.search }}" placeholder="Description, target, role…" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand" />
+    </div>
+  </form>
+
+  <div class="rounded-xl border border-border bg-white shadow-card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-border px-4 py-3">
+      <h2 class="text-lg font-semibold">Recent activity</h2>
+      <span class="text-xs text-textMuted">Showing {{ logs|length }} entr{{ logs|length == 1 ? 'y' : 'ies' }}</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs uppercase tracking-wider text-textMuted">
+            <th class="border-b border-border px-4 py-3">When</th>
+            <th class="border-b border-border px-4 py-3">User</th>
+            <th class="border-b border-border px-4 py-3">Action</th>
+            <th class="border-b border-border px-4 py-3">Target</th>
+            <th class="border-b border-border px-4 py-3">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            {% set actionColor = {
+              'create': 'bg-green-100 text-green-800',
+              'update': 'bg-amber-100 text-amber-800',
+              'delete': 'bg-red-100 text-red-800'
+            }[log.action] ?? 'bg-gray-100 text-gray-800' %}
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="border-b border-border px-4 py-3 whitespace-nowrap text-textMuted">
+                {{ log.createdAt|date('Y-m-d H:i') }}
+              </td>
+              <td class="border-b border-border px-4 py-3">
+                <div class="flex flex-col">
+                  <span class="font-semibold text-sm">{{ log.actorName ?? (log.actor ? log.actor.username : 'Unknown') }}</span>
+                  <span class="text-xs text-textMuted">{{ log.actorEmail ?? (log.actor ? log.actor.email : '—') }}</span>
+                  <span class="text-[11px] uppercase tracking-[2px] text-gray-400">{{ log.actorRole ?? '—' }}</span>
+                </div>
+              </td>
+              <td class="border-b border-border px-4 py-3">
+                <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold {{ actionColor }}">
+                  <i data-lucide="activity" class="h-4 w-4"></i>
+                  {{ log.action|capitalize }}
+                </span>
+              </td>
+              <td class="border-b border-border px-4 py-3">
+                <div class="text-sm font-medium">{{ log.entityType|capitalize }}</div>
+                <div class="text-xs text-textMuted">ID: {{ log.entityId ?? '—' }}</div>
+                <div class="text-xs text-gray-600">{{ log.targetData ?? '—' }}</div>
+              </td>
+              <td class="border-b border-border px-4 py-3 text-gray-800">
+                {{ log.description ?? '—' }}
+                {% if log.changes %}
+                  <div class="mt-1 text-xs text-textMuted">
+                    {% for key, value in log.changes %}
+                      <span class="inline-flex items-center rounded bg-gray-100 px-2 py-1 mr-1 mb-1">{{ key }}: {{ value }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="5" class="border-b border-border px-4 py-6 text-center text-textMuted">No activity yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

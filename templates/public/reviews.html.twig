@@ -1,0 +1,46 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}Customer Reviews • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home{% endblock %}
+
+{% block public_page_body %}
+
+  <main class="lp-page lp-page--reviews">
+    <div class="lp-container">
+      <header class="lp-reviews-hero">
+        <h2 class="lp-reviews-title">
+          {{ reviewsTitle|default('Customer Reviews')|replace({'About Us':'<span>About Us</span>'})|raw }}
+        </h2>
+      </header>
+
+      <div class="lp-reviews" role="list" aria-label="Customer reviews">
+        {% for r in reviewsItems|default([]) %}
+          {% set name = r.name|default('') %}
+          {% set initials = r.initials|default(name|split(' ')|map(v => v|slice(0,1))|join('')|slice(0,2)) %}
+          {% set rating = r.rating is defined ? r.rating : 4.0 %}
+          <article class="lp-review" role="listitem">
+            <div class="lp-review__avatar" aria-hidden="true">{{ initials|upper }}</div>
+            <div class="lp-review__name-row">
+              <h3 class="lp-review__name">{{ name }}</h3>
+              <div class="lp-review__rating" aria-label="Rating {{ rating }} out of 5">
+                <span class="lp-review__stars" aria-hidden="true">★★★★★</span>
+                <span class="lp-review__rating-value">{{ rating }}</span>
+              </div>
+            </div>
+            <p class="lp-review__text">{{ r.text|default('') }}</p>
+            <a class="lp-review__more" href="{{ path('public_reviews') }}">
+              {{ r.link_label|default('Explore More') }} <span aria-hidden="true">➜</span>
+            </a>
+          </article>
+        {% endfor %}
+      </div>
+
+      <div class="lp-reviews-viewmore">
+        <a class="lp-reviews-viewmore__btn" href="{{ path('public_reviews') }}">{{ reviewsViewMoreLabel|default('View More') }}</a>
+      </div>
+    </div>
+  </main>
+
+{% endblock %}
+

@@ -1,0 +1,71 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Stock #{{ stock.id }} • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[900px] p-4 sm:p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[3px] text-textMuted">Stock Management</p>
+      <h1 class="text-2xl font-semibold">Stock Entry #{{ stock.id }}</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{{ path('admin_stocks_edit', {id: stock.id}) }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all">
+        <i data-lucide="edit-3" class="h-4 w-4"></i>
+        Edit
+      </a>
+      <a href="{{ path('admin_stocks_index') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline><path d="M20 12H10"></path></svg>
+        Back
+      </a>
+    </div>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2">
+    <div class="rounded-xl border border-border bg-white shadow-card p-6 space-y-4">
+      <h2 class="text-sm font-semibold text-textMuted uppercase tracking-[3px]">Product</h2>
+      {% if stock.product %}
+        <div class="flex items-center gap-4">
+          {% set primaryImage = stock.product.primaryImage %}
+          {% if primaryImage %}
+            {% if primaryImage starts with 'http' %}
+              <img src="{{ primaryImage }}" alt="{{ stock.product.name }}" class="h-20 w-20 rounded-xl object-cover border border-border" />
+            {% else %}
+              <img src="{{ asset(primaryImage) }}" alt="{{ stock.product.name }}" class="h-20 w-20 rounded-xl object-cover border border-border" />
+            {% endif %}
+          {% else %}
+            <div class="h-20 w-20 rounded-xl bg-gray-100 flex items-center justify-center text-xs text-textMuted">No image</div>
+          {% endif %}
+          <div>
+            <p class="text-lg font-semibold">{{ stock.product.name }}</p>
+            <p class="text-sm text-textMuted">{{ stock.product.color }} • {{ stock.product.size }}</p>
+          </div>
+        </div>
+        <div class="text-sm text-gray-700">
+          <p><span class="font-medium">Price:</span> {{ stock.product.price ? ('₱' ~ stock.product.price) : '—' }}</p>
+          <p class="mt-2"><span class="font-medium">Description:</span><br>{{ stock.product.description ?: '—' }}</p>
+        </div>
+      {% else %}
+        <p class="text-textMuted">No product linked.</p>
+      {% endif %}
+    </div>
+
+    <div class="rounded-xl border border-border bg-white shadow-card p-6 space-y-4">
+      <h2 class="text-sm font-semibold text-textMuted uppercase tracking-[3px]">Stock Details</h2>
+      <p class="text-xl font-bold">{{ stock.quantity }} stocks</p>
+      <div class="text-sm text-gray-700 space-y-2">
+        <p><span class="font-medium">Created at:</span> {{ stock.createdAt ? stock.createdAt|date('Y-m-d H:i') : '—' }}</p>
+        <p><span class="font-medium">Updated at:</span> {{ stock.updatedAt ? stock.updatedAt|date('Y-m-d H:i') : '—' }}</p>
+      </div>
+      <form method="post" action="{{ path('admin_stocks_delete', {id: stock.id}) }}" onsubmit="return confirm('Delete this stock entry? This will also delete the associated product.');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stock.id) }}">
+        <button class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition-all" type="submit">
+          <i data-lucide="trash-2" class="h-4 w-4"></i>
+          Delete Entry
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

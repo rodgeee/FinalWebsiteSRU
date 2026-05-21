@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('styles/landingpage.css') }}">
+  {% block public_page_stylesheets %}{% endblock %}
+{% endblock %}
+
+{% block body %}
+  {% include 'shared/header.html.twig' %}
+
+  {% block public_page_body %}{% endblock %}
+
+  {% include 'shared/footer.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    (function () {
+      var hash = window.location.hash;
+      if (hash !== '#services') {
+        return;
+      }
+      if (window.location.pathname.replace(/\/$/, '') === '/services') {
+        return;
+      }
+      window.location.replace('{{ path('public_services') }}');
+    })();
+  </script>
+{% endblock %}

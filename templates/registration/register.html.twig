@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    <div style="max-width: 520px; margin: 40px auto;">
+        <h1 style="margin-bottom: 16px;">Create an account</h1>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div style="padding: 10px 12px; margin-bottom: 10px; border-radius: 6px; background: #f3f4f6;">
+                    <strong>{{ label|capitalize }}</strong>: {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {{ form_start(registrationForm) }}
+            {{ form_row(registrationForm.fullName) }}
+            {{ form_row(registrationForm.email) }}
+            {{ form_row(registrationForm.plainPassword) }}
+            {{ form_row(registrationForm.agreeTerms) }}
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 12px;">Register</button>
+        {{ form_end(registrationForm) }}
+    </div>
+{% endblock %}

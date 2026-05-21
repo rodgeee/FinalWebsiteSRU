@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Landing Page • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-route-landing{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <meta name="turbo-cache-control" content="no-cache">
+    <link rel="stylesheet" href="{{ asset('styles/landingpage.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+      (function () {
+        if (window.location.hash !== '#services') {
+          return;
+        }
+        window.location.replace('{{ path('public_services') }}');
+      })();
+    </script>
+{% endblock %}
+
+{% block body %}
+  {% include 'shared/header.html.twig' %}
+
+  <section class="hero" data-controller="carousel" data-carousel-interval-value="6000" aria-label="Featured products">
+    <div class="hero__scrim" aria-hidden="true"></div>
+    <div class="slides">
+      <div class="slide" data-carousel-target="slide" style="background-image: url('{{ asset('img/Adi zero white.png') }}');"></div>
+      <div class="slide" data-carousel-target="slide" style="background-image: url('{{ asset('img/ASICS GEL KAYANO 20 FRIENDS AND FAMILY.png') }}');"></div>
+      <div class="slide" data-carousel-target="slide" style="background-image: url('{{ asset('img/1906r moon sign.png') }}');"></div>
+    </div>
+    <div class="hero__content">
+      <div class="hero-captions">
+        <div class="hero-text" data-carousel-target="caption">
+          <p class="hero__eyebrow">New arrival</p>
+          <h1 class="hero-title">Adidas Adizero Evo SL W</h1>
+          <p class="hero-line">“Cloud White”</p>
+          <p class="hero__lead">Lightweight performance with a clean, race-day silhouette.</p>
+          <div class="hero__actions">
+            <a href="#featured-products" class="hero__cta">Shop now</a>
+            <a href="#brand-spotlight" class="hero__cta hero__cta--ghost">Explore brands</a>
+          </div>
+        </div>
+        <div class="hero-text" data-carousel-target="caption">
+          <p class="hero__eyebrow">Just dropped</p>
+          <h1 class="hero-title">ASICS GEL-Kayano 20</h1>
+          <p class="hero-line">“Friends and Family”</p>
+          <p class="hero__lead">Cushioned stability for miles of confident comfort.</p>
+          <div class="hero__actions">
+            <a href="#featured-products" class="hero__cta">Shop now</a>
+            <a href="#brand-spotlight" class="hero__cta hero__cta--ghost">Explore brands</a>
+          </div>
+        </div>
+        <div class="hero-text" data-carousel-target="caption">
+          <p class="hero__eyebrow">Trending</p>
+          <h1 class="hero-title">New Balance 1906R</h1>
+          <p class="hero-line">“Moon Sign”</p>
+          <p class="hero__lead">Heritage running style with a bold, modern edge.</p>
+          <div class="hero__actions">
+            <a href="#featured-products" class="hero__cta">Shop now</a>
+            <a href="#brand-spotlight" class="hero__cta hero__cta--ghost">Explore brands</a>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-dots" role="tablist" aria-label="Hero slides">
+        <span class="dot" data-carousel-target="dot" data-action="click->carousel#go" data-index="0" role="tab" tabindex="0" aria-label="Slide 1"></span>
+        <span class="dot" data-carousel-target="dot" data-action="click->carousel#go" data-index="1" role="tab" tabindex="0" aria-label="Slide 2"></span>
+        <span class="dot" data-carousel-target="dot" data-action="click->carousel#go" data-index="2" role="tab" tabindex="0" aria-label="Slide 3"></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="featured-products" class="featured-rail lp-section" aria-labelledby="featured-heading">
+    <div class="featured-rail__head">
+      <h2 id="featured-heading" class="featured-rail__title">Shoes R' Us picks</h2>
+    </div>
+    <div class="featured-rail__band">
+      <div class="rail-body" data-rail-body>
+        <button type="button" class="rail-nav prev" aria-label="Previous products" data-rail-nav="prev">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="rail-track" data-rail-track>
+          {% for p in products|slice(0, 5) %}
+            {% set nameParts = p.name|default('')|trim|split(' ') %}
+            {% set brandLabel = nameParts|length > 1 ? nameParts[0]|upper : null %}
+            {% set productTitle = p.name|default('')|trim|upper %}
+            <article class="rail-item">
+              <a href="{{ path('public_product_show', { id: p.id }) }}" class="prod-card prod-card--link" data-turbo-frame="_top">
+                <button type="button" class="prod-card__wishlist" aria-label="Save {{ p.name }} to wishlist" onclick="event.preventDefault(); event.stopPropagation();">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20.25l-1.45-1.32C5.4 14.36 2 11.28 2 7.5 2 5 4 3 6.5 3c1.74 0 3.41 1.01 4.22 2.44C11.09 4.01 12.76 3 14.5 3 17 3 19 5 19 7.5c0 3.78-3.4 6.86-8.55 11.43L12 20.25z" stroke="currentColor" stroke-width="1.6"/></svg>
+                </button>
+                <div class="prod-card__media">
+                  {% set primary = p.primaryImage %}
+                  {% if primary %}
+                    {% if primary starts with 'http' %}
+                      <img src="{{ primary }}" alt="{{ p.name }}" loading="lazy" decoding="async"/>
+                    {% else %}
+                      <img src="{{ asset(primary) }}" alt="{{ p.name }}" loading="lazy" decoding="async"/>
+                    {% endif %}
+                  {% else %}
+                    <img src="{{ asset('img/shoes-r-us-logo.png') }}" alt="{{ p.name }}" loading="lazy" decoding="async"/>
+                  {% endif %}
+                </div>
+                <div class="prod-card__body">
+                  {% if brandLabel %}<p class="prod-card__brand">{{ brandLabel }}</p>{% endif %}
+                  <p class="prod-card__name">{{ productTitle }}</p>
+                  <p class="prod-card__price">{{ p.price ? '₱' ~ p.price|number_format(0, '.', ',') : '—' }}</p>
+                </div>
+              </a>
+            </article>
+          {% else %}
+            <article class="rail-item">
+              <div class="prod-card">
+                <div class="prod-card__media">
+                  <img src="{{ asset('img/shoes-r-us-logo.png') }}" alt="Product" loading="lazy" decoding="async"/>
+                </div>
+                <div class="prod-card__body">
+                  <p class="prod-card__name">No products yet</p>
+                  <p class="prod-card__price">—</p>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+        <button type="button" class="rail-nav next" aria-label="Next products" data-rail-nav="next">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="brand-spotlight" class="brand-featured lp-section" aria-labelledby="spotlight-title">
+    <div class="lp-wrap brand-featured__intro">
+      <p class="section-head__eyebrow section-head__eyebrow--center">Editorial picks</p>
+      <h2 id="spotlight-title" class="brand-featured__heading">Brands that define the season</h2>
+      <p class="brand-featured__sub">Performance and street-ready silhouettes, curated for the Shoes R’ Us community.</p>
+      <a href="#shop-by-brand" class="brand-featured__btn">View collection</a>
+    </div>
+    <div class="brand-featured__row">
+      <article class="brand-panel brand-panel--left" style="--panel-image: url('{{ asset('img/J1 LOST AND FOUND.png') }}');">
+        <div class="brand-panel__content">
+          <p class="brand-panel__eyebrow">Brands you love</p>
+          <h3 class="brand-panel__title">Nike</h3>
+          <p class="brand-panel__desc">Icons and collabs, built for the spotlight.</p>
+          <a href="#shop-by-brand" class="brand-panel__btn">Shop Nike</a>
+        </div>
+      </article>
+      <article class="brand-panel brand-panel--right" style="--panel-image: url('{{ asset('img/NEW BALANCE.png') }}');">
+        <div class="brand-panel__content">
+          <p class="brand-panel__eyebrow">Brands you know</p>
+          <h3 class="brand-panel__title">New Balance</h3>
+          <p class="brand-panel__desc">Heritage comfort with a modern stride.</p>
+          <a href="#shop-by-brand" class="brand-panel__btn">Shop NB</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="shop-by-brand" class="brands lp-section" aria-labelledby="brands-heading">
+    <div class="lp-wrap">
+      <header class="section-head section-head--center">
+        <p class="section-head__eyebrow">By brand</p>
+        <h2 id="brands-heading" class="section-head__title">Shop by brand</h2>
+      </header>
+      <div class="brands-grid">
+        <a href="#" class="brand-card">
+          <div class="brand-card__media">
+            <img src="{{ asset('img/ADIDAS-01.png') }}" alt="" loading="lazy" decoding="async">
+          </div>
+          <div class="brand-card__overlay">
+            <span class="brand-card__cta">Shop</span>
+          </div>
+        </a>
+        <a href="#" class="brand-card">
+          <div class="brand-card__media">
+            <img src="{{ asset('img/PUMA-01.png') }}" alt="" loading="lazy" decoding="async">
+          </div>
+          <div class="brand-card__overlay">
+            <span class="brand-card__cta">Shop</span>
+          </div>
+        </a>
+        <a href="#" class="brand-card">
+          <div class="brand-card__media">
+            <img src="{{ asset('img/NIKE.png') }}" alt="" loading="lazy" decoding="async">
+          </div>
+          <div class="brand-card__overlay">
+            <span class="brand-card__cta">Shop</span>
+          </div>
+        </a>
+        <a href="#" class="brand-card">
+          <div class="brand-card__media">
+            <img src="{{ asset('img/NB-01.png') }}" alt="" loading="lazy" decoding="async">
+          </div>
+          <div class="brand-card__overlay">
+            <span class="brand-card__cta">Shop</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="holiday-sale" class="holiday-rush" aria-labelledby="sale-heading">
+    <div class="holiday-rush__bg" aria-hidden="true"></div>
+    <div class="lp-wrap holiday-rush__container">
+      <p class="holiday-rush__eyebrow">Limited time</p>
+      <div class="holiday-rush__headline" id="sale-heading">
+        <span class="holiday-rush__line">The</span>
+        <span class="holiday-rush__line">Holiday</span>
+        <span class="holiday-rush__line">Rush</span>
+      </div>
+      <div class="holiday-rush__subline">
+        <span>Sale</span>
+        <span class="holiday-rush__sep">·</span>
+        <span>Up to</span>
+        <span class="holiday-rush__accent">70% off</span>
+      </div>
+      <a href="#featured-products" class="holiday-rush__cta">Shop the sale</a>
+    </div>
+  </section>
+
+  {% include 'shared/footer.html.twig' %}
+{% endblock %}

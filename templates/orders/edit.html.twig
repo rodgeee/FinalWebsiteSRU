@@ -1,0 +1,50 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Edit {{ order.displayOrderNumber }} • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[700px] p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Edit {{ order.displayOrderNumber }}</h1>
+      <a href="{{ path('admin_orders_show', {id: order.id}) }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all">Back</a>
+    </div>
+
+    {% for message in app.flashes('error') %}
+      <div class="rounded-xl bg-red-50 border border-red-200 p-3 text-red-800 mb-3">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+      <div class="rounded-xl bg-green-50 border border-green-200 p-3 text-green-800 mb-3">{{ message }}</div>
+    {% endfor %}
+
+    <div class="rounded-xl border border-border bg-white shadow-card p-4">
+      {{ form_start(form) }}
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            {{ form_label(form.OrderStatus) }}
+            {{ form_widget(form.OrderStatus, { 'attr': { 'class': 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand focus:outline-none' } }) }}
+            {{ form_errors(form.OrderStatus) }}
+          </div>
+          <div>
+            {{ form_label(form.TrackingNumber) }}
+            {{ form_widget(form.TrackingNumber, { 'attr': { 'class': 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand focus:outline-none' } }) }}
+            {{ form_errors(form.TrackingNumber) }}
+          </div>
+          <div>
+            {{ form_label(form.Remarks) }}
+            {{ form_widget(form.Remarks, { 'attr': { 'rows': 4, 'class': 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand focus:outline-none' } }) }}
+            {{ form_errors(form.Remarks) }}
+          </div>
+        </div>
+        <div class="mt-4">
+          <button class="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg" type="submit">Save Changes</button>
+        </div>
+      {{ form_end(form) }}
+
+      <form method="post" action="{{ path('admin_orders_delete', {id: order.id}) }}" onsubmit="return confirm('Delete this order? (Use for tests/cancelled only)');" class="mt-4 pt-4 border-t border-border">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+        <button class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white" type="submit">Delete order</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

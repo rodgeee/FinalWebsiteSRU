@@ -1,0 +1,16 @@
+{
+  "name": "srusystem-tailwind",
+  "private": true,
+  "scripts": {
+    "fonts:copy": "node scripts/copy-fonts.cjs",
+    "postinstall": "node scripts/copy-fonts.cjs",
+    "build:tailwind": "tailwindcss -i ./assets/styles/tailwind.input.css -o ./public/styles/tailwind.css --minify",
+    "watch:tailwind": "tailwindcss -i ./assets/styles/tailwind.input.css -o ./public/styles/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/sora": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
+    "tailwindcss": "^3.4.1"
+  }
+}

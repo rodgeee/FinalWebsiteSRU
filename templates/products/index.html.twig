@@ -1,0 +1,106 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Products • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[1200px] p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Products</h1>
+      <div class="flex items-center gap-2">
+        <form method="get" action="{{ path('admin_products_index') }}" class="hidden sm:flex items-center gap-2">
+          <input type="text" name="q" value="{{ q|default('') }}" placeholder="Search products…" class="w-64 rounded-xl border border-border px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand transition-all" />
+          {% if sort %}
+            <input type="hidden" name="sort" value="{{ sort }}" />
+          {% endif %}
+          {% if dir %}
+            <input type="hidden" name="dir" value="{{ dir }}" />
+          {% endif %}
+          <button class="rounded-xl bg-brand px-3 py-2 text-sm font-semibold text-white" type="submit">Search</button>
+        </form>
+        {% set backRoute = is_granted('ROLE_ADMIN') ? 'app_dashboard' : 'admin_stocks_index' %}
+        <a href="{{ path(backRoute) }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all" title="Return" aria-label="Return">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline><path d="M20 12H10"></path></svg>
+          <span class="sr-only">Return</span>
+        </a>
+        <a href="{{ path('admin_stocks_new') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg" title="Create products via Stocks page">
+        <i data-lucide="layers" class="h-5 w-5"></i>
+        Add via Stocks
+        </a>
+      </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+      <div class="rounded-xl bg-green-50 border border-green-200 p-3 text-green-800 mb-3">{{ message }}</div>
+    {% endfor %}
+
+    <div class="rounded-xl border border-border bg-white shadow-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            {% set toggleDir = dir == 'ASC' ? 'DESC' : 'ASC' %}
+            <tr class="text-left text-xs uppercase tracking-wider text-textMuted">
+              <th class="border-b border-border px-4 py-3"><a class="hover:underline" href="{{ path('admin_products_index', { q: q, sort: 'id', dir: sort == 'id' ? toggleDir : 'ASC' }) }}">ID{% if sort == 'id' %} {{ dir == 'ASC' ? '▲' : '▼' }}{% endif %}</a></th>
+              <th class="border-b border-border px-4 py-3">Image</th>
+              <th class="border-b border-border px-4 py-3"><a class="hover:underline" href="{{ path('admin_products_index', { q: q, sort: 'name', dir: sort == 'name' ? toggleDir : 'ASC' }) }}">Name{% if sort == 'name' %} {{ dir == 'ASC' ? '▲' : '▼' }}{% endif %}</a></th>
+              <th class="border-b border-border px-4 py-3"><a class="hover:underline" href="{{ path('admin_products_index', { q: q, sort: 'color', dir: sort == 'color' ? toggleDir : 'ASC' }) }}">Color{% if sort == 'color' %} {{ dir == 'ASC' ? '▲' : '▼' }}{% endif %}</a></th>
+              <th class="border-b border-border px-4 py-3"><a class="hover:underline" href="{{ path('admin_products_index', { q: q, sort: 'size', dir: sort == 'size' ? toggleDir : 'ASC' }) }}">Size{% if sort == 'size' %} {{ dir == 'ASC' ? '▲' : '▼' }}{% endif %}</a></th>
+              <th class="border-b border-border px-4 py-3">Stock Qty</th>
+              <th class="border-b border-border px-4 py-3"><a class="hover:underline" href="{{ path('admin_products_index', { q: q, sort: 'price', dir: sort == 'price' ? toggleDir : 'ASC' }) }}">Price{% if sort == 'price' %} {{ dir == 'ASC' ? '▲' : '▼' }}{% endif %}</a></th>
+              <th class="border-b border-border px-4 py-3">Description</th>
+              <th class="border-b border-border px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products %}
+              <tr>
+                <td class="border-b border-border px-4 py-3">{{ p.id }}</td>
+                <td class="border-b border-border px-4 py-3">
+                  {% set primary = p.primaryImage %}
+                  {% if primary %}
+                    {% if primary starts with 'http' %}
+                      <img src="{{ primary }}" alt="{{ p.name }}" class="h-12 w-12 rounded-md object-cover border border-border" />
+                    {% else %}
+                      <img src="{{ asset(primary) }}" alt="{{ p.name }}" class="h-12 w-12 rounded-md object-cover border border-border" />
+                    {% endif %}
+                  {% else %}
+                    <div class="h-12 w-12 rounded-md bg-gray-100 flex items-center justify-center text-[10px] text-textMuted">No image</div>
+                  {% endif %}
+                </td>
+                <td class="border-b border-border px-4 py-3">{{ p.name }}</td>
+                <td class="border-b border-border px-4 py-3">{{ p.color }}</td>
+                <td class="border-b border-border px-4 py-3">{{ p.size }}</td>
+                <td class="border-b border-border px-4 py-3">{{ p.totalStockQuantity }}</td>
+                <td class="border-b border-border px-4 py-3">{{ p.price ? ('₱' ~ p.price) : '—' }}</td>
+                <td class="border-b border-border px-4 py-3 text-gray-700">
+                  {% if p.description %}
+                    {% set desc = p.description %}
+                    {{ desc|length > 80 ? desc|slice(0, 80) ~ '…' : desc }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td class="border-b border-border px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <a class="text-brand hover:underline" href="{{ path('admin_products_show', {id: p.id}) }}" aria-label="View" title="View">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </a>
+                    <a class="text-gray-600 hover:underline" href="{{ path('admin_stocks_index') }}" aria-label="Manage stock" title="Manage via Stocks">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"></path></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="9" class="px-4 py-6 text-center text-textMuted">No products found</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

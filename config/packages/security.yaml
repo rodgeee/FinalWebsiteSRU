@@ -1,29 +1,134 @@
 security:
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_STAFF]
+        ROLE_STAFF: []
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\Entity\Adminuser: 'auto'
+        App\Entity\Staff: 'auto'
+        App\Entity\Customer: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        admin_user_provider:
+            entity:
+                class: App\Entity\Adminuser
+                property: Email
+        staff_user_provider:
+            entity:
+                class: App\Entity\Staff
+                property: email
+        customer_user_provider:
+            entity:
+                class: App\Entity\Customer
+                property: email
+        chain_user_provider:
+            chain:
+                providers: [staff_user_provider, admin_user_provider]
+        api_user_provider:
+            chain:
+                providers: [customer_user_provider, staff_user_provider, admin_user_provider]
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        api_platform:
+            pattern: ^/api
+            stateless: true
+            provider: customer_user_provider
+            user_checker: App\Security\CustomerAppUserChecker
+            json_login:
+                check_path: /api/login
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
+
+        customer:
+            # Customer auth only; do not intercept the bare root (/) so admin/ngrok flows stay separate.
+            # Include "connect" so Google OAuth callback shares the same firewall/session as login & signup.
+            # Include "brands" so guests hitting the protected brands page get redirected to /login (storefront has no entry point).
+            pattern: ^/(login|signup|account|logout|connect|brands)
+            lazy: true
+            provider: customer_user_provider
+            user_checker: App\Security\UserStatusChecker
+            form_login:
+                login_path: customer_login
+                check_path: customer_login
+                default_target_path: /landingpage
+                # Always open the in-site landing after login (not the public About/Contact page you came from).
+                always_use_default_target_path: true
+                enable_csrf: true
+                csrf_token_id: customer_authenticate
+                username_parameter: email
+                password_parameter: password
+            logout:
+                path: customer_logout
+                target: customer_login
+                enable_csrf: true
+                csrf_token_manager: security.csrf.token_manager
+                csrf_parameter: _csrf_token
+                csrf_token_id: customer_logout
         main:
             lazy: true
-            provider: users_in_memory
+            pattern: ^/(admin|adminls|dashboard|post-login)
+            provider: chain_user_provider
+            user_checker: App\Security\UserStatusChecker
+            form_login:
+                login_path: adminls_login
+                check_path: adminls_login
+                default_target_path: /post-login
+                enable_csrf: false
+                username_parameter: email
+                password_parameter: password
+            logout:
+                path: adminls_logout
+                target: adminls_login
+                enable_csrf: false
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+        # Public storefront routes (/landingpage, /about, …) must use a firewall so the session
+        # token from the "customer" firewall is loaded; otherwise is_granted('ROLE_CUSTOMER') is always false there.
+        storefront:
+            pattern: ^/
+            lazy: true
+            provider: customer_user_provider
+            user_checker: App\Security\UserStatusChecker
+            context: customer
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/login/google, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/customer/signup, roles: PUBLIC_ACCESS }
+        - { path: ^/api/customer, roles: ROLE_CUSTOMER }
+        - { path: ^/signup, roles: PUBLIC_ACCESS }
+        - { path: ^/brands, roles: ROLE_CUSTOMER }
+        - { path: ^/releases, roles: ROLE_CUSTOMER }
+        - { path: ^/products/, roles: ROLE_CUSTOMER }
+        - { path: ^/cart, roles: ROLE_CUSTOMER }
+        - { path: ^/checkout, roles: ROLE_CUSTOMER }
+        - { path: ^/, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/verify-email, roles: PUBLIC_ACCESS }
+        - { path: ^/staff/verify-email, roles: PUBLIC_ACCESS }
+        - { path: ^/connect/google, roles: PUBLIC_ACCESS }
+        - { path: ^/adminls/connect/google, roles: PUBLIC_ACCESS }
+        - { path: ^/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/account, roles: ROLE_CUSTOMER }
+        - { path: ^/adminls/login, roles: PUBLIC_ACCESS }
+        - { path: ^/adminls/register, roles: ROLE_ADMIN }
+        - { path: ^/adminls/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/dashboard/profile, roles: ROLE_STAFF }
+        - { path: ^/dashboard/profile/edit, roles: ROLE_STAFF }
+        - { path: ^/admin/dashboard$, roles: ROLE_STAFF }
+        - { path: ^/admin/activity-log, roles: ROLE_ADMIN }
+        - { path: ^/admin/staff, roles: ROLE_ADMIN }
+        - { path: ^/admin/products, roles: ROLE_STAFF }
+        - { path: ^/admin/orders, roles: ROLE_STAFF }
+        - { path: ^/admin/stocks, roles: ROLE_STAFF }
+        - { path: ^/admin/service, roles: ROLE_STAFF }
+        - { path: ^/admin/transactions, roles: ROLE_STAFF }
+        - { path: ^/admin, roles: ROLE_ADMIN }
 
 when@test:
     security:

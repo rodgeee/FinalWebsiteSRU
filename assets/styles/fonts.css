@@ -1,0 +1,16 @@
+/* Self-hosted Sora (headings/display). Body uses system sans-serif. */
+@font-face {
+    font-family: "Sora";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/sora-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Sora";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("/fonts/sora-latin-800-normal.woff2") format("woff2");
+}

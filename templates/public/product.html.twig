@@ -1,0 +1,310 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}{{ displayName }} • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-product-page{% endblock %}
+
+{% block public_page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/product-page.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/releases-page.css') }}">
+{% endblock %}
+
+{% block public_page_body %}
+    <main class="lp-product" data-lp-product>
+        <div class="lp-product__hero">
+            <div class="lp-product__gallery" data-lp-product-gallery>
+                {% if gallery is not empty %}
+                    <div class="lp-product__thumbs" role="tablist" aria-label="Product images">
+                        {% for image in gallery %}
+                            <button
+                                type="button"
+                                class="lp-product__thumb{% if loop.first %} is-active{% endif %}"
+                                data-lp-product-thumb
+                                data-image-src="{% if image starts with 'http' %}{{ image }}{% else %}{{ asset(image) }}{% endif %}"
+                                aria-label="View image {{ loop.index }}"
+                                aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                            >
+                                {% if image starts with 'http' %}
+                                    <img src="{{ image }}" alt="" loading="lazy">
+                                {% else %}
+                                    <img src="{{ asset(image) }}" alt="" loading="lazy">
+                                {% endif %}
+                            </button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="lp-product__main-image">
+                    {% set heroImage = gallery[0] ?? null %}
+                    {% if heroImage %}
+                        {% if heroImage starts with 'http' %}
+                            <img src="{{ heroImage }}" alt="{{ product.name }}" data-lp-product-main decoding="async">
+                        {% else %}
+                            <img src="{{ asset(heroImage) }}" alt="{{ product.name }}" data-lp-product-main decoding="async">
+                        {% endif %}
+                    {% else %}
+                        <img src="{{ asset('img/shoes-r-us-logo.png') }}" alt="{{ product.name }}" data-lp-product-main decoding="async">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="lp-product__buy">
+                <div class="lp-product__buy-top">
+                    {% if brandLabel %}
+                        <p class="lp-product__brand">{{ brandLabel }}</p>
+                    {% endif %}
+                    <button type="button" class="lp-product__wishlist" aria-label="Save to wishlist">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 20.25l-1.45-1.32C5.4 14.36 2 11.28 2 7.5 2 5 4 3 6.5 3c1.74 0 3.41 1.01 4.22 2.44C11.09 4.01 12.76 3 14.5 3 17 3 19 5 19 7.5c0 3.78-3.4 6.86-8.55 11.43L12 20.25z" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <h1 class="lp-product__title">{{ displayName }}</h1>
+                <p class="lp-product__price">
+                    {{ product.price ? '₱' ~ product.price|number_format(0, '.', ',') : '—' }}
+                </p>
+
+                {% set colorName = product.color|default('')|trim %}
+
+                <div class="lp-product__color-section">
+                    <p class="lp-product__section-label">
+                        COLOR: <strong>{{ colorName|upper }}</strong>
+                    </p>
+                    <div class="lp-product__color-variants" role="list">
+                        {% for variant in colorVariants %}
+                            {% set vImg = variant.image %}
+                            {% if variant.isCurrent %}
+                                <span class="lp-product__color-variant is-active" title="{{ variant.color }}">
+                                    {% if vImg %}
+                                        {% if vImg starts with 'http' %}
+                                            <img src="{{ vImg }}" alt="{{ variant.color }}">
+                                        {% else %}
+                                            <img src="{{ asset(vImg) }}" alt="{{ variant.color }}">
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                            {% else %}
+                                <a
+                                    href="{{ path('public_product_show', { id: variant.product.id }) }}"
+                                    class="lp-product__color-variant"
+                                    title="{{ variant.color }}"
+                                    data-turbo-frame="_top"
+                                >
+                                    {% if vImg %}
+                                        {% if vImg starts with 'http' %}
+                                            <img src="{{ vImg }}" alt="{{ variant.color }}">
+                                        {% else %}
+                                            <img src="{{ asset(vImg) }}" alt="{{ variant.color }}">
+                                        {% endif %}
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="lp-product__sizes">
+                    <div class="lp-product__sizes-head">
+                        <span class="lp-product__section-label">SIZE: <strong>US</strong></span>
+                        <button type="button" class="lp-product__size-chart" data-lp-product-scroll="size-fit">Size chart</button>
+                    </div>
+                    <div class="lp-product__size-grid" role="group" aria-label="Select size">
+                        {% for size in sizes %}
+                            <button
+                                type="button"
+                                class="lp-product__size{% if loop.first %} is-selected{% endif %}"
+                                data-lp-product-size="{{ size }}"
+                            >{{ size|replace({'US': ''})|trim }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="lp-product__purchase">
+                    <div class="lp-product__qty-control" aria-label="Quantity">
+                        <button type="button" data-lp-product-qty="down" aria-label="Decrease quantity">−</button>
+                        <span data-lp-product-qty-value>1</span>
+                        <button type="button" data-lp-product-qty="up" aria-label="Increase quantity">+</button>
+                    </div>
+                    <button type="button" class="lp-product__cta" data-lp-product-add-bag>Add to Bag</button>
+                </div>
+
+                <form
+                    id="lp-product-cart-form"
+                    method="post"
+                    action="{{ path('customer_cart_add') }}"
+                    class="lp-product__cart-form"
+                    hidden
+                    data-turbo="false"
+                >
+                    <input type="hidden" name="_token" value="{{ csrf_token('cart_add') }}">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input type="hidden" name="size" value="" data-lp-product-cart-size>
+                    <input type="hidden" name="quantity" value="1" data-lp-product-cart-qty>
+                </form>
+
+                <ul class="lp-product__trust">
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span><strong>Authenticity Guaranteed:</strong> 100% genuine products from authorized sources.</span>
+                    </li>
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7h13l3 5v5H3V7z" stroke="currentColor" stroke-width="1.5"/><path d="M16 7l2-3h3v3" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span><strong>Free Shipping:</strong> Complimentary shipping on orders over ₱5,000.</span>
+                    </li>
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16v10H4z" stroke="currentColor" stroke-width="1.5"/><path d="M8 7V5h8v2" stroke="currentColor" stroke-width="1.5"/></svg>
+                        <span><strong>7-Day Exchanges:</strong> Unworn items in original packaging may be exchanged within 7 days.</span>
+                    </li>
+                </ul>
+
+                <div class="lp-product__accordions">
+                    <details class="lp-product__accordion">
+                        <summary>Editor's note</summary>
+                        <p>A standout from our latest drop — built for daily wear with premium materials and a clean silhouette. Pair with your favorite fits from the collection.</p>
+                    </details>
+                    <details class="lp-product__accordion" open>
+                        <summary>Product details</summary>
+                        <p>{{ product.description|default('Premium footwear from Shoes R\' Us. Crafted for comfort and style with quality upper materials and a durable outsole.')|nl2br }}</p>
+                    </details>
+                    <details class="lp-product__accordion" id="size-fit">
+                        <summary>Size and fit</summary>
+                        <p>Runs true to size for most customers. If you are between sizes, we recommend sizing up. Refer to the size grid above or contact us for fit advice.</p>
+                    </details>
+                    <details class="lp-product__accordion">
+                        <summary>FAQ</summary>
+                        <p><strong>Is this authentic?</strong> Yes — all items are sourced through authorized channels.</p>
+                        <p><strong>When will it ship?</strong> Orders ship within 2–3 business days after payment confirmation.</p>
+                        <p><strong>Can I return?</strong> Unworn items in original packaging may be returned within 7 days.</p>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        {% if sameShopProducts is not empty %}
+            <section class="lp-product__rail" aria-labelledby="same-shop-heading">
+                <h2 id="same-shop-heading" class="lp-product__rail-title">From the same drop</h2>
+                <div class="lp-releases__grid">
+                    {% for item in sameShopProducts %}
+                        {% include 'public/_product_card.html.twig' with {
+                            product: item,
+                            brandLabel: brandLabel
+                        } only %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+        {% if suggestedProducts is not empty %}
+            <section class="lp-product__rail" aria-labelledby="picks-heading">
+                <h2 id="picks-heading" class="lp-product__rail-title">Shoes R' Us picks</h2>
+                <div class="lp-releases__grid">
+                    {% for item in suggestedProducts %}
+                        {% include 'public/_product_card.html.twig' with {
+                            product: item,
+                            brandLabel: null
+                        } only %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            function initProductPage() {
+                const root = document.querySelector('[data-lp-product]');
+                if (!root || root.dataset.lpProductInit === '1') {
+                    return;
+                }
+                root.dataset.lpProductInit = '1';
+
+                const mainImg = root.querySelector('[data-lp-product-main]');
+                root.querySelectorAll('[data-lp-product-thumb]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        const src = btn.getAttribute('data-image-src');
+                        if (mainImg && src) {
+                            mainImg.src = src;
+                        }
+                        root.querySelectorAll('[data-lp-product-thumb]').forEach(function (b) {
+                            b.classList.remove('is-active');
+                            b.setAttribute('aria-selected', 'false');
+                        });
+                        btn.classList.add('is-active');
+                        btn.setAttribute('aria-selected', 'true');
+                    });
+                });
+
+                root.querySelectorAll('[data-lp-product-size]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        root.querySelectorAll('[data-lp-product-size]').forEach(function (b) {
+                            b.classList.remove('is-selected');
+                        });
+                        btn.classList.add('is-selected');
+                    });
+                });
+
+                let qty = 1;
+                const qtyEl = root.querySelector('[data-lp-product-qty-value]');
+                root.querySelectorAll('[data-lp-product-qty]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        const dir = btn.getAttribute('data-lp-product-qty');
+                        qty = dir === 'up' ? Math.min(99, qty + 1) : Math.max(1, qty - 1);
+                        if (qtyEl) {
+                            qtyEl.textContent = String(qty);
+                        }
+                    });
+                });
+
+                const cartForm = document.getElementById('lp-product-cart-form');
+                const cartSizeInput = cartForm?.querySelector('[data-lp-product-cart-size]');
+                const cartQtyInput = cartForm?.querySelector('[data-lp-product-cart-qty]');
+
+                root.querySelector('[data-lp-product-add-bag]')?.addEventListener('click', function () {
+                    const sizeButtons = root.querySelectorAll('[data-lp-product-size]');
+                    let sizeValue = '';
+                    if (sizeButtons.length > 0) {
+                        const selectedSize = root.querySelector('[data-lp-product-size].is-selected');
+                        if (!selectedSize) {
+                            window.alert('Please select a size.');
+                            return;
+                        }
+                        sizeValue = selectedSize.getAttribute('data-lp-product-size') || '';
+                    }
+                    if (cartForm && cartSizeInput && cartQtyInput) {
+                        cartSizeInput.value = sizeValue;
+                        cartQtyInput.value = String(qty);
+                        cartForm.submit();
+                    }
+                });
+
+                root.querySelectorAll('[data-lp-product-scroll]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        const id = btn.getAttribute('data-lp-product-scroll');
+                        const target = id ? document.getElementById(id) : null;
+                        if (target) {
+                            target.open = true;
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    });
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', initProductPage);
+            document.addEventListener('turbo:load', initProductPage);
+            document.addEventListener('turbo:render', initProductPage);
+            document.addEventListener('turbo:before-cache', function () {
+                const root = document.querySelector('[data-lp-product]');
+                if (root) {
+                    delete root.dataset.lpProductInit;
+                }
+            });
+            if (document.readyState !== 'loading') {
+                initProductPage();
+            }
+        })();
+    </script>
+{% endblock %}

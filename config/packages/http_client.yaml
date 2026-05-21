@@ -1,0 +1,6 @@
+framework:
+    http_client:
+        default_options:
+            # Avoid hanging forever when Google token/userinfo endpoints are slow or blocked (e.g. Docker/firewall).
+            timeout: 20
+            max_duration: 25

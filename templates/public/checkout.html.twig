@@ -1,0 +1,82 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}Checkout • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-checkout-page{% endblock %}
+
+{% block public_page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/cart-page.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/checkout-page.css') }}">
+{% endblock %}
+
+{% block public_page_body %}
+    <main class="lp-checkout">
+        <header class="lp-checkout__head">
+            <h1 class="lp-checkout__title">Checkout</h1>
+            <a href="{{ path('customer_cart_index') }}" class="lp-checkout__back" data-turbo-frame="_top">← Back to bag</a>
+        </header>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <p class="lp-cart__flash lp-cart__flash--{{ label }}" role="status">{{ message }}</p>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="lp-checkout__layout">
+            <section class="lp-checkout__form-wrap" aria-label="Checkout details">
+                {{ form_start(form, {
+                    attr: {
+                        class: 'lp-checkout__form',
+                        'data-turbo': 'false'
+                    }
+                }) }}
+                    <input type="hidden" name="_token" value="{{ csrf_token('checkout_place') }}">
+
+                    {% if form.addressId is defined %}
+                        <fieldset class="lp-checkout__fieldset">
+                            <legend class="lp-checkout__legend">{{ form_label(form.addressId) }}</legend>
+                            {{ form_widget(form.addressId) }}
+                            {{ form_errors(form.addressId) }}
+                            <p class="lp-checkout__hint">
+                                <a href="{{ path('customer_account', { tab: 'address', new_address: 1 }) }}" data-turbo-frame="_top">Add another address</a>
+                            </p>
+                        </fieldset>
+                    {% endif %}
+
+                    <div class="lp-checkout__field">
+                        {{ form_label(form.paymentMethod) }}
+                        {{ form_widget(form.paymentMethod) }}
+                        {{ form_errors(form.paymentMethod) }}
+                    </div>
+
+                    <div class="lp-checkout__field">
+                        {{ form_label(form.orderNotes) }}
+                        {{ form_widget(form.orderNotes) }}
+                        {{ form_errors(form.orderNotes) }}
+                    </div>
+
+                    <button type="submit" class="lp-cart__btn lp-cart__btn--primary lp-checkout__submit">Place order</button>
+                {{ form_end(form) }}
+            </section>
+
+            <aside class="lp-checkout__summary" aria-label="Order summary">
+                <h2 class="lp-cart__summary-title">Order summary</h2>
+                <ul class="lp-checkout__lines">
+                    {% for line in lines %}
+                        <li>
+                            <span class="lp-checkout__line-name">{{ line.productName }} × {{ line.quantity }}</span>
+                            <span class="lp-checkout__line-price">₱{{ (line.unitPrice * line.quantity)|number_format(0, '.', ',') }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <dl class="lp-cart__summary-rows">
+                    <div>
+                        <dt>Subtotal ({{ itemCount }} items)</dt>
+                        <dd>₱{{ subtotal|number_format(0, '.', ',') }}</dd>
+                    </div>
+                </dl>
+                <p class="lp-cart__summary-note">You will receive a confirmation email at checkout. Payment instructions depend on your selected method.</p>
+            </aside>
+        </div>
+    </main>
+{% endblock %}

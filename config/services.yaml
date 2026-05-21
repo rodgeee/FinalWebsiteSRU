@@ -4,6 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    mailer_from_address: '%env(MAILER_FROM_ADDRESS)%'
+    mailer_from_name: '%env(default::MAILER_FROM_NAME)%'
+    # Default when APP_DEEP_LINK_SCHEME is unset (mobile OAuth redirect: vallejera://auth/callback)
+    env(APP_DEEP_LINK_SCHEME): 'vallejera'
 
 services:
     # default configuration for services in *this* file
@@ -15,6 +19,40 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    App\Service\EmailVerificationService:
+        arguments:
+            $fromAddress: '%mailer_from_address%'
+            $fromName: '%mailer_from_name%'
+
+    App\Service\StaffVerificationService:
+        arguments:
+            $fromAddress: '%mailer_from_address%'
+            $fromName: '%mailer_from_name%'
+
+    App\Controller\GoogleLoginController:
+        arguments:
+            # default:: allows the app to boot when Google OAuth is not configured (empty strings).
+            $googleClientId: '%env(default::GOOGLE_CLIENT_ID)%'
+            $googleClientSecret: '%env(default::GOOGLE_CLIENT_SECRET)%'
+            $googleCallbackUrl: '%env(default::GOOGLE_CALLBACK_URL)%'
+
+    App\Service\Google\GoogleIdTokenVerifier:
+        arguments:
+            $allowedAudiences:
+                - '%env(default::GOOGLE_CLIENT_ID)%'
+                - '%env(default::GOOGLE_ANDROID_CLIENT_ID)%'
+                - '%env(default::GOOGLE_IOS_CLIENT_ID)%'
+
+    App\Security\MobileOAuthJwtBridge:
+        arguments:
+            $appDeepLinkScheme: '%env(APP_DEEP_LINK_SCHEME)%'
+
+    App\Controller\StaffGoogleLoginController:
+        arguments:
+            # default:: allows the app to boot when Google OAuth is not configured (empty strings).
+            $googleClientId: '%env(default::GOOGLE_CLIENT_ID)%'
+            $googleClientSecret: '%env(default::GOOGLE_CLIENT_SECRET)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

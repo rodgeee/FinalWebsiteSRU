@@ -1,0 +1,55 @@
+/* Shoes R' Us Admin Login/Signup - Horizontal Split Design */
+:root{--blue:#0077FF;--blue-hover:#005FCC;--text:#1A1A1A;--muted:#666666;--bg:#FFFFFF;--input:#F8F9FB;--border:#E5E7EB;--radius:12px;--shadow:0 8px 24px rgba(0,0,0,0.08)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:sans-serif}
+h1,h2,h3,h4,h5,h6{font-family:"Sora",sans-serif;font-weight:700}
+
+.adminls-container{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff;padding:20px;position:relative}
+.adminls-card{display:flex;width:100%;max-width:1100px;min-height:500px;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;position:relative;z-index:1}
+
+.adminls-left{width:45%;background:linear-gradient(135deg,#0077FF,#4CA9FF);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:40px}
+.adminls-left::after{content:"";position:absolute;inset:0;background:url('/assets/img/pattern2.png') center/cover no-repeat;opacity:0.15}
+.adminls-left .content{position:relative;z-index:1;text-align:center}
+.adminls-left .logo{width:60px;height:60px;margin:0 auto 20px auto;object-fit:contain}
+.adminls-left h1{margin:0 0 16px 0;font-size:32px;font-weight:800;line-height:1.2}
+.adminls-left p{margin:0 0 30px 0;font-size:16px;opacity:0.9;max-width:300px;line-height:1.5}
+.adminls-left .footnote{position:absolute;bottom:20px;left:40px;right:40px;font-size:12px;opacity:0.8;text-align:center}
+
+.adminls-right{width:55%;background:#fff;padding:2.5rem;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.adminls-right .brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.adminls-right .brand-logo{width:40px;height:40px;object-fit:contain}
+.adminls-right .brand-text h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.4px}
+.adminls-right .brand-text p{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+
+.adminls-right .title{margin:0 0 24px 0;font-size:28px;font-weight:700;color:var(--text)}
+.adminls-form{display:flex;flex-direction:column;gap:16px}
+.adminls-field{display:flex;flex-direction:column;gap:6px}
+.adminls-field label{font-size:14px;color:var(--muted);font-weight:600}
+.adminls-input{width:100%;padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--input);font-size:14px;transition:all .2s ease}
+.adminls-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,119,255,0.1)}
+
+.adminls-row{display:flex;align-items:center;justify-content:space-between;margin:8px 0}
+.adminls-checkbox{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.adminls-link{color:var(--blue);text-decoration:none;font-weight:600;font-size:14px}
+.adminls-link:hover{color:var(--blue-hover)}
+
+.adminls-button{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);padding:14px 16px;font-weight:600;font-size:16px;cursor:pointer;transition:all .2s ease;margin-top:8px}
+.adminls-button:hover{background:var(--blue-hover);transform:translateY(-1px)}
+
+.adminls-footer{margin-top:24px;text-align:center;font-size:14px;color:var(--muted)}
+
+/* Responsive */
+@media (max-width: 768px){
+  .adminls-container{padding:10px}
+  .adminls-card{flex-direction:column;height:auto;max-width:420px;margin:0 auto}
+  .adminls-left{width:100%;height:200px;padding:30px}
+  .adminls-right{width:100%;padding:2rem;z-index:3}
+  .adminls-left h1{font-size:24px}
+  .adminls-left p{font-size:14px;margin-bottom:20px}
+}
+
+@media (max-width: 480px){
+  .adminls-container{padding:10px}
+  .adminls-right{padding:1.5rem}
+  .adminls-right .title{font-size:24px}
+}

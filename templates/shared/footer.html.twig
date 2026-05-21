@@ -1,0 +1,60 @@
+<footer id="site-footer" class="footer">
+  <div class="lp-wrap">
+    <div class="footer-grid">
+      <div class="footer-cta">
+        <p class="footer-cta__eyebrow">Never miss a drop.</p>
+        <h2 class="footer-cta__title">Join our waiting list.</h2>
+        <p class="footer-cta__copy">
+          Don’t miss out — get early access to new drops, exclusive offers, and the latest trends shaping sneaker culture.
+        </p>
+        <form class="footer-cta__form" action="#" method="post">
+          <label for="footerEmail" class="sr-only">Email address</label>
+          <div class="footer-cta__field">
+            <input id="footerEmail" type="email" name="email" placeholder="Enter your email here" autocomplete="email" required>
+            <button type="submit" aria-label="Submit email">→</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-links__col">
+          <h4>Shop by</h4>
+          <a href="{{ path('app_landingpage_legacy') }}#featured-products">New arrivals</a>
+          {% if is_granted('ROLE_CUSTOMER') %}
+            <a href="{{ path('public_brands') }}">Brand</a>
+          {% else %}
+            <a href="{{ path('app_landingpage_legacy') }}#shop-by-brand">Brand</a>
+          {% endif %}
+          <a href="{{ path('app_landingpage_legacy') }}#featured-products">Footwear</a>
+          <a href="#">Apparel</a>
+          <a href="#">Accessories</a>
+        </div>
+        <div class="footer-links__col">
+          <h4>Sections</h4>
+          <a href="{{ path('public_releases') }}">Releases &amp; raffle</a>
+          <a href="{{ path('public_services') }}">Shoe cleaning</a>
+          <a href="{{ path('public_releases') }}">Special releases</a>
+        </div>
+        <div class="footer-links__col" id="footer-support">
+          <h4>Support</h4>
+          {% if is_granted('ROLE_CUSTOMER') %}
+            <a href="{{ path('customer_account') }}">Account</a>
+          {% else %}
+            <a href="{{ path('customer_login') }}">Account</a>
+          {% endif %}
+          <a href="#">Help</a>
+          <a href="#">Customer support</a>
+          <a href="#">Legal</a>
+        </div>
+        <div class="footer-links__col">
+          <h4>Company</h4>
+          <a href="{{ path('app_landingpage_legacy') }}">Home</a>
+          <a href="{{ path('public_about') }}">About</a>
+          <a href="{{ path('public_contact') }}">Contact</a>
+          <a href="{{ path('public_reviews') }}">Customer reviews</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© {{ "now"|date('Y') }} Shoes R' Us</div>
+</footer>

@@ -1,5 +1,28 @@
+# Force ngrok visitors on root to the admin login page.
+ngrok_root_redirect:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: adminls_login
+        permanent: false
+    condition: "request.headers.get('x-forwarded-host') matches '/ngrok/i' or request.headers.get('x-original-host') matches '/ngrok/i' or request.headers.get('host') matches '/ngrok/i' or request.getHost() matches '/ngrok/i' or request.headers.get('forwarded') matches '/ngrok/i'"
+
+# Default root redirects to the public landing page.
+# Kept after `ngrok_root_redirect` so ngrok hosts still go to admin login.
+root_landingpage_redirect:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: app_landingpage_legacy
+        permanent: false
+
 controllers:
     resource:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Explicit route so Turbo/registration flow can generate it reliably.
+app_verify_email:
+    path: /verify-email
+    controller: App\Controller\EmailVerificationController::verifyUserEmail

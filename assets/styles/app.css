@@ -1,3 +1,20 @@
-body {
-    background-color: skyblue;
+@import "./fonts.css";
+
+/* Site-wide typography: Sora (headings) + sans-serif (body) */
+body,
+button,
+input,
+select,
+textarea {
+    font-family: sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Sora", sans-serif;
+    font-weight: 700;
 }

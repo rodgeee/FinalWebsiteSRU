@@ -1,0 +1,102 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}Your Bag • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-cart-page{% endblock %}
+
+{% block public_page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/cart-page.css') }}">
+{% endblock %}
+
+{% block public_page_body %}
+    <main class="lp-cart">
+        <header class="lp-cart__head">
+            <h1 class="lp-cart__title">Your bag</h1>
+            <p class="lp-cart__meta">{{ itemCount }} item{{ itemCount == 1 ? '' : 's' }}</p>
+        </header>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <p class="lp-cart__flash lp-cart__flash--{{ label }}" role="status">{{ message }}</p>
+            {% endfor %}
+        {% endfor %}
+
+        {% if lines is empty %}
+            <div class="lp-cart__empty">
+                <p>Your bag is empty.</p>
+                <a href="{{ path('public_releases') }}" class="lp-cart__btn lp-cart__btn--primary" data-turbo-frame="_top">Shop releases</a>
+            </div>
+        {% else %}
+            <div class="lp-cart__layout">
+                <section class="lp-cart__items" aria-label="Bag items">
+                    {% for line in lines %}
+                        {% set lineTotal = line.unitPrice * line.quantity %}
+                        {% set stock = stockByLine[line.key]|default(null) %}
+                        <article class="lp-cart__item">
+                            <a href="{{ path('public_product_show', { id: line.productId }) }}" class="lp-cart__item-image" data-turbo-frame="_top">
+                                {% if line.image %}
+                                    {% if line.image starts with 'http' %}
+                                        <img src="{{ line.image }}" alt="">
+                                    {% else %}
+                                        <img src="{{ asset(line.image) }}" alt="">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{{ asset('img/shoes-r-us-logo.png') }}" alt="">
+                                {% endif %}
+                            </a>
+                            <div class="lp-cart__item-body">
+                                <h2 class="lp-cart__item-name">
+                                    <a href="{{ path('public_product_show', { id: line.productId }) }}" data-turbo-frame="_top">{{ line.productName }}</a>
+                                </h2>
+                                {% if line.color %}
+                                    <p class="lp-cart__item-meta">Color: {{ line.color }}</p>
+                                {% endif %}
+                                {% if line.size %}
+                                    <p class="lp-cart__item-meta">Size: {{ line.size }}</p>
+                                {% endif %}
+                                <p class="lp-cart__item-price">₱{{ line.unitPrice|number_format(0, '.', ',') }}</p>
+                                {% if stock is not null and stock < line.quantity %}
+                                    <p class="lp-cart__item-warning">Only {{ stock }} left in stock.</p>
+                                {% endif %}
+                                <div class="lp-cart__item-actions">
+                                    <form method="post" action="{{ path('customer_cart_update') }}" class="lp-cart__qty-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cart_update') }}">
+                                        <input type="hidden" name="line_key" value="{{ line.key }}">
+                                        <label class="lp-cart__qty-label">
+                                            <span class="visually-hidden">Quantity</span>
+                                            <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="99" class="lp-cart__qty-input">
+                                        </label>
+                                        <button type="submit" class="lp-cart__link-btn">Update</button>
+                                    </form>
+                                    <form method="post" action="{{ path('customer_cart_remove') }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cart_remove') }}">
+                                        <input type="hidden" name="line_key" value="{{ line.key }}">
+                                        <button type="submit" class="lp-cart__link-btn lp-cart__link-btn--danger">Remove</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <p class="lp-cart__item-total">₱{{ lineTotal|number_format(0, '.', ',') }}</p>
+                        </article>
+                    {% endfor %}
+                </section>
+
+                <aside class="lp-cart__summary" aria-label="Order summary">
+                    <h2 class="lp-cart__summary-title">Summary</h2>
+                    <dl class="lp-cart__summary-rows">
+                        <div>
+                            <dt>Subtotal</dt>
+                            <dd>₱{{ subtotal|number_format(0, '.', ',') }}</dd>
+                        </div>
+                        <div>
+                            <dt>Shipping</dt>
+                            <dd>Calculated at checkout</dd>
+                        </div>
+                    </dl>
+                    <p class="lp-cart__summary-note">Free shipping on orders over ₱5,000.</p>
+                    <a href="{{ path('customer_checkout_index') }}" class="lp-cart__btn lp-cart__btn--primary" data-turbo-frame="_top">Proceed to checkout</a>
+                    <a href="{{ path('public_releases') }}" class="lp-cart__btn lp-cart__btn--ghost" data-turbo-frame="_top">Continue shopping</a>
+                </aside>
+            </div>
+        {% endif %}
+    </main>
+{% endblock %}

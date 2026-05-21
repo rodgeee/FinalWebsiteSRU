@@ -1,0 +1,239 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}About Us • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-route-about{% endblock %}
+
+{% block public_page_stylesheets %}
+  <link rel="stylesheet" href="{{ asset('styles/about-page.css') }}">
+{% endblock %}
+
+{% set about_team = [
+  { name: 'Rodge Gionne Vallejera', role: 'Founder & Owner', initials: 'RV' },
+  { name: 'Lenny Rose Jacinto', role: 'Store Manager', initials: 'LJ' },
+  { name: 'Aljemark Sendiong', role: 'Graphic Designer', initials: 'AS' },
+  { name: 'Kurt Mendrick Tatoy', role: 'Customer Experience', initials: 'KT' },
+  { name: 'Angelho Lymwel Campana', role: 'Stock & Fulfillment', initials: 'AC' },
+] %}
+
+{% block public_page_body %}
+  <main class="lp-page lp-page--about" id="about-main">
+    <header class="lp-about-hero">
+      <div class="lp-about-hero__scrim" aria-hidden="true"></div>
+      <div class="lp-wrap lp-about-hero__layout">
+        <div class="lp-about-hero__copy">
+          <p class="lp-about-hero__eyebrow">Shoes R' Us · Curated · Community</p>
+          <h1 class="lp-about-hero__title">Built for the way you actually shop sneakers</h1>
+          <p class="lp-about-hero__lead">
+            Honest product stories, calm browsing, and a team that answers like people who lace up—so you spend less time decoding listings and more time loving the pair on your feet.
+          </p>
+          <div class="lp-about-hero__actions">
+            <a href="{{ path('app_landingpage_legacy') }}#featured-products" class="lp-about-hero__cta lp-about-hero__cta--primary">Shop featured</a>
+            <a href="{{ path('public_contact') }}" class="lp-about-hero__cta lp-about-hero__cta--ghost">Talk to us</a>
+          </div>
+          <nav class="lp-about-hero__anchors" aria-label="On this page">
+            <a class="lp-about-hero__anchor" href="#about-story">Story</a>
+            <span class="lp-about-hero__anchor-sep" aria-hidden="true">·</span>
+            <a class="lp-about-hero__anchor" href="#about-offers">Experience</a>
+            <span class="lp-about-hero__anchor-sep" aria-hidden="true">·</span>
+            <a class="lp-about-hero__anchor" href="#about-team">Crew</a>
+          </nav>
+        </div>
+        <figure class="lp-about-hero__figure">
+          <img
+            src="{{ asset('img/J1 LOST AND FOUND.png') }}"
+            alt="Air Jordan 1 sneaker product still life"
+            width="560"
+            height="560"
+            class="lp-about-hero__photo"
+            decoding="async"
+          >
+        </figure>
+      </div>
+    </header>
+
+    <section id="about-highlights" class="lp-about-band lp-about-band--stats lp-section" aria-labelledby="about-stats-heading">
+      <div class="lp-about-band__inner">
+        <h2 id="about-stats-heading" class="sr-only">Why shoppers trust us</h2>
+        <ul class="lp-about-stats" role="list">
+          <li class="lp-about-stats__cell">
+            <span class="lp-about-stats__value">100+</span>
+            <span class="lp-about-stats__label">Curated styles in rotation</span>
+          </li>
+          <li class="lp-about-stats__cell">
+            <span class="lp-about-stats__value">40+</span>
+            <span class="lp-about-stats__label">Brand partners we stand behind</span>
+          </li>
+          <li class="lp-about-stats__cell">
+            <span class="lp-about-stats__value">24/7</span>
+            <span class="lp-about-stats__label">Support when you need answers</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="about-story" class="lp-about-split lp-section" aria-labelledby="about-story-heading">
+      <div class="lp-wrap lp-about-split__grid">
+        <div class="lp-about-split__content">
+          <p class="lp-about-split__eyebrow">Our story</p>
+          <h2 id="about-story-heading" class="lp-about-split__title">A wall you can trust—not another noisy feed</h2>
+          <p class="lp-about-split__text">
+            We started Shoes R' Us because sneaker shopping shouldn’t feel like guesswork: blurry photos, vague color names, and sizing threads at 2 a.m.
+          </p>
+          <p class="lp-about-split__text">
+            Today we mix performance, lifestyle, and collabs with editorial pacing—so discovery feels intentional, not algorithmic.
+          </p>
+          <blockquote class="lp-about-split__quote">
+            <p>“If it’s on our wall, we’d wear it—or we wouldn’t ship it.”</p>
+            <footer class="lp-about-split__quote-meta">From the founder — we obsess over accurate specs, real imagery, and humans on chat who actually know the fit.</footer>
+          </blockquote>
+        </div>
+        <figure class="lp-about-split__figure">
+          <div class="lp-about-split__frame">
+            <img
+              src="{{ asset('img/NEW BALANCE.png') }}"
+              alt="New Balance lifestyle product still life"
+              width="640"
+              height="640"
+              loading="lazy"
+              decoding="async"
+              class="lp-about-split__img"
+            >
+          </div>
+          <figcaption class="lp-about-split__caption">Studio and on-foot context so you know what you’re getting.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="about-mission" class="lp-about-mission lp-section" aria-labelledby="about-mission-heading">
+      <div class="lp-wrap lp-about-mission__wrap">
+        <p class="lp-about-mission__eyebrow">Mission</p>
+        <h2 id="about-mission-heading" class="lp-about-mission__statement">Quality pairs. Clear truth. Zero runaround.</h2>
+        <p class="lp-about-mission__support">From first click to doorstep—we protect your time, your size, and the hype you’re chasing.</p>
+      </div>
+    </section>
+
+    <section id="about-offers" class="lp-about-offers lp-section" aria-labelledby="about-offers-heading">
+      <div class="lp-wrap lp-about-offers__inner">
+        <header class="lp-about-offers__head">
+          <p class="lp-about-offers__eyebrow">Storefront</p>
+          <h2 id="about-offers-heading" class="lp-about-offers__title">What you get here</h2>
+          <p class="lp-about-offers__intro">Tight merchandising, transparent detail, and support that sounds like your crew.</p>
+        </header>
+        <div class="lp-about-offers__grid">
+          <article class="lp-about-offer-tile">
+            <div class="lp-about-offer-tile__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M12 3v3"/><path d="m16.25 6.75-1.75 1.75"/><path d="M19 12h-3"/><path d="m16.25 17.25-1.75-1.75"/><path d="M12 18v3"/><path d="m7.75 17.25 1.75-1.75"/><path d="M5 12h3"/><path d="m7.75 6.75 1.75 1.75"/><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            <h3 class="lp-about-offer-tile__title">Fresh drops &amp; staples</h3>
+            <p class="lp-about-offer-tile__text">New arrivals sit next to everyday icons—so you always see what just landed.</p>
+          </article>
+          <article class="lp-about-offer-tile">
+            <div class="lp-about-offer-tile__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 7h16"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M9 7V5a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v2"/></svg>
+            </div>
+            <h3 class="lp-about-offer-tile__title">Brand wall energy</h3>
+            <p class="lp-about-offer-tile__text">Compare silhouettes without tab overload—runners, street, collabs in one calm grid.</p>
+          </article>
+          <article class="lp-about-offer-tile">
+            <div class="lp-about-offer-tile__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+            </div>
+            <h3 class="lp-about-offer-tile__title">Real human support</h3>
+            <p class="lp-about-offer-tile__text">Sizing, exchanges, order updates—answered by people who know the product.</p>
+          </article>
+          <article class="lp-about-offer-tile">
+            <div class="lp-about-offer-tile__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+            </div>
+            <h3 class="lp-about-offer-tile__title">Dispatch you can count on</h3>
+            <p class="lp-about-offer-tile__text">Careful QC and packing—the last mile is part of the experience.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about-trust" class="lp-about-trust lp-section" aria-labelledby="about-trust-heading">
+      <div class="lp-wrap">
+        <header class="lp-about-trust__head">
+          <p class="lp-about-trust__eyebrow">Shop with confidence</p>
+          <h2 id="about-trust-heading" class="lp-about-trust__title">Straightforward trust, no theatrics</h2>
+        </header>
+        <ul class="lp-about-trust__strip" role="list">
+          <li class="lp-about-trust__row">
+            <span class="lp-about-trust__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            </span>
+            <div class="lp-about-trust__copy">
+              <span class="lp-about-trust__strong">Authentic sourcing</span>
+              <span class="lp-about-trust__detail">Careful buying and QC on every pair we sell.</span>
+            </div>
+          </li>
+          <li class="lp-about-trust__row">
+            <span class="lp-about-trust__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
+            </span>
+            <div class="lp-about-trust__copy">
+              <span class="lp-about-trust__strong">Transparent pricing</span>
+              <span class="lp-about-trust__detail">Clear ₱ totals at checkout—no surprise fees.</span>
+            </div>
+          </li>
+          <li class="lp-about-trust__row">
+            <span class="lp-about-trust__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+            </span>
+            <div class="lp-about-trust__copy">
+              <span class="lp-about-trust__strong">Tracked fulfillment</span>
+              <span class="lp-about-trust__detail">Status updates you can act on from pack to delivery.</span>
+            </div>
+          </li>
+          <li class="lp-about-trust__row">
+            <span class="lp-about-trust__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <div class="lp-about-trust__copy">
+              <span class="lp-about-trust__strong">Community-informed buys</span>
+              <span class="lp-about-trust__detail">Feedback shapes what we stock next.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="about-team" class="lp-about-team lp-section" aria-labelledby="about-team-heading">
+      <div class="lp-wrap">
+        <header class="lp-about-team__head">
+          <p class="lp-about-team__eyebrow">The crew</p>
+          <h2 id="about-team-heading" class="lp-about-team__title">Humans behind every stack &amp; sealed box</h2>
+          <p class="lp-about-team__lead">Merch, floor, creative, and fulfillment—one team getting the right pair to the right doorstep.</p>
+        </header>
+        <ul class="lp-about-team-list" role="list">
+          {% for member in about_team %}
+            <li class="lp-about-team-row">
+              <span class="lp-about-team-row__avatar" aria-hidden="true">{{ member.initials }}</span>
+              <div class="lp-about-team-row__meta">
+                <span class="lp-about-team-row__role">{{ member.role }}</span>
+                <span class="lp-about-team-row__name">{{ member.name }}</span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section class="lp-about-bottom-cta lp-section" aria-labelledby="about-cta-heading">
+      <div class="lp-about-bottom-cta__bg" aria-hidden="true"></div>
+      <div class="lp-wrap lp-about-bottom-cta__inner">
+        <p class="lp-about-bottom-cta__eyebrow">Ready when you are</p>
+        <h2 id="about-cta-heading" class="lp-about-bottom-cta__title">See what’s on the wall right now</h2>
+        <p class="lp-about-bottom-cta__copy">Featured heat, shop-by-brand, and reviews from people who already unboxed—start where you like.</p>
+        <div class="lp-about-bottom-cta__actions">
+          <a href="{{ path('app_landingpage_legacy') }}#featured-products" class="lp-about-bottom-cta__btn lp-about-bottom-cta__btn--primary">Browse featured</a>
+          <a href="{{ path('app_landingpage_legacy') }}#shop-by-brand" class="lp-about-bottom-cta__btn lp-about-bottom-cta__btn--ghost">Shop by brand</a>
+          <a href="{{ path('public_reviews') }}" class="lp-about-bottom-cta__btn lp-about-bottom-cta__btn--ghost">Read reviews</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+{% endblock %}

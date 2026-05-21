@@ -1,0 +1,166 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}My Account • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-account-page{% endblock %}
+
+{% block flashes %}{% endblock %}
+
+{% block public_page_stylesheets %}
+  <link rel="stylesheet" href="{{ asset('styles/account-page.css') }}">
+{% endblock %}
+
+{% block public_page_body %}
+  <main class="lp-account" id="account">
+    {% for label, messages in app.flashes %}
+      {% for message in messages %}
+        <p class="lp-account-flash{{ label == 'error' ? ' lp-account-flash--error' : '' }}" role="{{ label == 'error' ? 'alert' : 'status' }}">{{ message }}</p>
+      {% endfor %}
+    {% endfor %}
+
+    <h1 class="lp-account__hello">Hello!</h1>
+    <p class="lp-account__intro">
+      Manage your profile, track orders, view order history, manage your wishlist, and stay updated on the latest releases and exclusive offers.
+    </p>
+
+    <nav class="lp-account__nav" aria-label="Account sections">
+      <a href="{{ path('customer_account', {tab: 'personal'}) }}" class="{{ activeTab == 'personal' ? 'is-active' : '' }}">Personal information</a>
+      <a href="{{ path('customer_account', {tab: 'address'}) }}" class="{{ activeTab == 'address' ? 'is-active' : '' }}">Address</a>
+      <a href="{{ path('customer_account', {tab: 'orders'}) }}" class="{{ activeTab == 'orders' ? 'is-active' : '' }}">Orders</a>
+      <a href="{{ path('customer_account', {tab: 'wishlist'}) }}" class="{{ activeTab == 'wishlist' ? 'is-active' : '' }}">Wishlist</a>
+      <a href="{{ path('customer_account', {tab: 'notify'}) }}" class="{{ activeTab == 'notify' ? 'is-active' : '' }}">Notify me</a>
+      <form method="post" action="{{ path('customer_logout') }}" data-turbo="false" style="display:inline;">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('customer_logout') }}">
+        <button type="submit" class="lp-account__nav-signout">Sign out</button>
+      </form>
+    </nav>
+
+    <section class="lp-account__panel {{ activeTab == 'personal' ? 'is-active' : '' }}" id="personal" aria-labelledby="personal-heading">
+      <p class="lp-account__panel-lead" id="personal-heading">
+        Keep your personal details up to date for a seamless shopping experience.
+      </p>
+
+      <form class="lp-account-form" method="post" action="{{ path('customer_account') }}" data-turbo="false">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('customer_account') }}">
+        <input type="hidden" name="form_type" value="personal">
+
+        <div class="lp-account-form__row lp-account-form__row--3">
+          <div class="lp-account-form__field">
+            <label for="title">Title</label>
+            <select class="lp-account-form__select" id="title" name="title">
+              {% for option in ['Mr.', 'Ms.', 'Mrs.', 'Mx.'] %}
+                <option value="{{ option }}" {{ profile.title == option ? 'selected' : '' }}>{{ option }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="lp-account-form__field">
+            <label for="firstName">First name</label>
+            <input class="lp-account-form__input" type="text" id="firstName" name="firstName" value="{{ profile.firstName }}" required autocomplete="given-name">
+          </div>
+          <div class="lp-account-form__field">
+            <label for="lastName">Last name</label>
+            <input class="lp-account-form__input" type="text" id="lastName" name="lastName" value="{{ profile.lastName }}" required autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="lp-account-form__row lp-account-form__row--2">
+          <div class="lp-account-form__field">
+            <label for="email">Email</label>
+            <input class="lp-account-form__input" type="email" id="email" name="email" value="{{ profile.email }}" required autocomplete="email">
+          </div>
+          <div class="lp-account-form__field">
+            <label for="phoneNumber">Phone number</label>
+            <div class="lp-account-form__phone">
+              <select class="lp-account-form__select" id="countryCode" name="countryCode" aria-label="Country code">
+                <option value="+63" {{ profile.countryCode == '+63' ? 'selected' : '' }}>+63</option>
+                <option value="+1" {{ profile.countryCode == '+1' ? 'selected' : '' }}>+1</option>
+                <option value="+44" {{ profile.countryCode == '+44' ? 'selected' : '' }}>+44</option>
+                <option value="+61" {{ profile.countryCode == '+61' ? 'selected' : '' }}>+61</option>
+                <option value="+81" {{ profile.countryCode == '+81' ? 'selected' : '' }}>+81</option>
+              </select>
+              <input class="lp-account-form__input" type="tel" id="phoneNumber" name="phoneNumber" value="{{ profile.phoneLocal }}" autocomplete="tel-national" placeholder="Phone number">
+            </div>
+          </div>
+        </div>
+
+        <div class="lp-account-form__row lp-account-form__row--dob">
+          <fieldset class="lp-account-form__field">
+            <legend class="lp-account-form__legend">Date of birth</legend>
+            <div class="lp-account-form__dob">
+              <select class="lp-account-form__select" id="birthDay" name="birthDay" aria-label="Day">
+                <option value="">Day</option>
+                {% for d in 1..31 %}
+                  <option value="{{ d }}" {{ profile.birthDay == d ? 'selected' : '' }}>{{ d }}</option>
+                {% endfor %}
+              </select>
+              <select class="lp-account-form__select" id="birthMonth" name="birthMonth" aria-label="Month">
+                <option value="">Month</option>
+                {% set months = {1:'January',2:'February',3:'March',4:'April',5:'May',6:'June',7:'July',8:'August',9:'September',10:'October',11:'November',12:'December'} %}
+                {% for num, label in months %}
+                  <option value="{{ num }}" {{ profile.birthMonth == num ? 'selected' : '' }}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <select class="lp-account-form__select" id="birthYear" name="birthYear" aria-label="Year">
+                <option value="">Year</option>
+                {% for y in range("now"|date('Y'), "now"|date('Y') - 100) %}
+                  <option value="{{ y }}" {{ profile.birthYear == y ? 'selected' : '' }}>{{ y }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </fieldset>
+          <div class="lp-account-form__field">
+            <label for="shoeSize">Shoes size (US)</label>
+            <select class="lp-account-form__select" id="shoeSize" name="shoeSize">
+              <option value="">Select size</option>
+              {% for size in ['5','5.5','6','6.5','7','7.5','8','8.5','9','9.5','10','10.5','11','11.5','12','12.5','13'] %}
+                <option value="{{ size }}" {{ profile.shoeSize == size ? 'selected' : '' }}>{{ size }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="lp-account-form__actions">
+          <button type="submit" class="lp-account-form__save">Save</button>
+        </div>
+      </form>
+    </section>
+
+    {% include 'customer/_account_address.html.twig' with {
+      activeTab: activeTab,
+      addresses: addresses|default([]),
+      addressForm: addressForm|default(null)
+    } %}
+
+    <section class="lp-account__panel {{ activeTab == 'orders' ? 'is-active' : '' }}" id="orders" aria-label="Orders">
+      <p class="lp-account__panel-lead">Track current orders and browse your order history.</p>
+      {% if orders is defined and orders is not empty %}
+        <ul class="lp-account-orders">
+          {% for order in orders %}
+            <li class="lp-account-orders__item">
+              <div class="lp-account-orders__head">
+                <strong>{{ order.displayOrderNumber }}</strong>
+                <span class="lp-account-orders__status">{{ order.orderStatus }}</span>
+              </div>
+              <p class="lp-account-orders__meta">
+                {{ order.dateCreated|date('M j, Y') }} · ₱{{ order.totalPrice|number_format(0, '.', ',') }} · {{ order.paymentMethod }}
+              </p>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="lp-account__placeholder">You have no orders yet.</p>
+        <p><a href="{{ path('public_releases') }}" data-turbo-frame="_top">Shop releases</a> to place your first order.</p>
+      {% endif %}
+    </section>
+
+    <section class="lp-account__panel {{ activeTab == 'wishlist' ? 'is-active' : '' }}" id="wishlist" aria-label="Wishlist">
+      <p class="lp-account__panel-lead">Items you save will appear here.</p>
+      <p class="lp-account__placeholder">Your wishlist is empty.</p>
+    </section>
+
+    <section class="lp-account__panel {{ activeTab == 'notify' ? 'is-active' : '' }}" id="notify" aria-label="Notify me">
+      <p class="lp-account__panel-lead">Get notified when your favorite products are back in stock or on release.</p>
+      <p class="lp-account__placeholder">No notify-me alerts yet.</p>
+    </section>
+  </main>
+{% endblock %}

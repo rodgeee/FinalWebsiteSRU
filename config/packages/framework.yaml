@@ -2,8 +2,31 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    # Trust all reverse proxies (ngrok, load balancers, etc.) so
+    # X-Forwarded-* headers are honored and HTTPS links/cookies are generated
+    # correctly even when TLS terminates before PHP (prevents mixed-content).
+    trusted_proxies: '0.0.0.0/0,::/0'
+    # Default allowlist; overridden in dev below.
+    trusted_hosts:
+        - '^127\\.0\\.0\\.1(?::\\d+)?$'
+        - '^localhost(?::\\d+)?$'
+        - '^.+\\.ngrok(-free)?\\.(app|dev)(?::\\d+)?$'
+    # Honor forwarded headers so generated URLs/forms use https behind ngrok.
+    trusted_headers: [forwarded, x-forwarded-for, x-forwarded-host, x-forwarded-proto, x-forwarded-port, x-forwarded-prefix]
+    # Help Symfony generate HTTPS URLs when behind a proxy/SSL terminator.
+    router:
+        https_port: 443
+
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        enabled: true
+        cookie_secure: auto        # secure when served over https (e.g., ngrok)
+        cookie_samesite: lax       # play nice with same-host navigations via ngrok
+
+when@dev:
+    framework:
+        # Loosen host checks entirely in dev to unblock local/ngrok browsing.
+        trusted_hosts: ['^.+$']
 
     #esi: true
     #fragments: true

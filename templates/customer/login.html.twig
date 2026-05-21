@@ -1,0 +1,373 @@
+{% extends 'base.html.twig' %}
+
+{% block body_class %}login-body{% endblock %}
+
+{# Base flashes sit above the layout and use rounded boxes — skip so the left panel matches the reference and messages show inside it. #}
+{% block flashes %}{% endblock %}
+
+{% block title %}Login • Shoes R' Us{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('styles/landingpage.css') }}">
+  <style>
+    :root {
+      --login-text: #111827;
+      --login-brand: #0033a0;
+      --login-heading: #0033a0;
+      --login-field-bg: #f2f2f2;
+      --login-field-border: transparent;
+      --login-divider: #e5e7eb;
+      --login-panel-max: 600px;
+      --login-gutter-x: clamp(16px, 3.5vw, 32px);
+      /* ~.lp-ref-header row (logo + padding + border); keeps shell math aligned */
+      --login-header-offset: 96px;
+    }
+    body.login-body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: #fff;
+      font-family: sans-serif;
+    }
+    body.login-body .lp-ref-header {
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.05);
+    }
+    .login-page-with-header {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    .login-page-with-header > .footer {
+      flex-shrink: 0;
+      width: 100%;
+    }
+    body.login-body button,
+    body.login-body input {
+      font-family: inherit;
+    }
+    /* 50 / 50 split: form | lifestyle image.
+       At least one full viewport below the header so the site footer stays off the first
+       screen (e.g. browser zoom ~70–90% where everything used to fit at once). */
+    .login-shell {
+      flex: 1 0 auto;
+      min-height: calc(100vh - var(--login-header-offset));
+      min-height: calc(100dvh - var(--login-header-offset));
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+    }
+    .login-shell__panel--form {
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      box-sizing: border-box;
+    }
+    .login-shell__scroll {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      width: 100%;
+      box-sizing: border-box;
+      /* Hug the left edge of the white column like the reference. */
+      padding: clamp(16px, 3.5vh, 40px) var(--login-gutter-x) 28px var(--login-gutter-x);
+    }
+    .login-page__intro {
+      width: 100%;
+      text-align: left;
+      align-self: flex-start;
+    }
+    .login-page__title {
+      margin: 0;
+      font-size: clamp(2rem, 4.2vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--login-heading);
+      line-height: 1.12;
+    }
+    .login-page__sub {
+      margin: 10px 0 0;
+      max-width: 28rem;
+      font-size: 15px;
+      line-height: 1.5;
+      font-weight: 400;
+      color: #000000;
+    }
+    .login-alerts { margin-top: 24px; }
+    .login-error,
+    .login-success {
+      margin: 0 0 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.45;
+      border-radius: 0;
+    }
+    .login-error {
+      border: 1px solid #fca5a5;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .login-success {
+      border: 1px solid #bbf7d0;
+      background: #ecfdf3;
+      color: #166534;
+    }
+    .login-matrix {
+      --login-label-col: minmax(110px, 150px);
+      --login-gap: 28px;
+      --login-field-max: 420px;
+      margin-top: 32px;
+      max-width: calc(150px + 28px + 420px);
+    }
+    .login-row {
+      display: grid;
+      grid-template-columns: var(--login-label-col) minmax(0, var(--login-field-max));
+      column-gap: var(--login-gap);
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .login-row label {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--login-text);
+    }
+    .login-input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--login-field-border);
+      background: var(--login-field-bg);
+      border-radius: 0;
+      padding: 14px 16px;
+      font-size: 15px;
+      color: var(--login-text);
+      transition: box-shadow 150ms ease, border-color 150ms ease;
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: #d1d5db;
+      box-shadow: 0 0 0 2px rgba(11, 54, 178, 0.12);
+    }
+    .login-actions {
+      margin-left: calc(150px + var(--login-gap));
+      max-width: var(--login-field-max);
+    }
+    .login-btn-primary {
+      width: 100%;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 0;
+      padding: 16px 20px;
+      background: var(--login-heading);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background-color 120ms ease;
+    }
+    .login-btn-primary:hover { background: #0047c7; }
+    .login-btn-primary:active { background: #002878; }
+    .login-oauth-block {
+      margin-top: 28px;
+      margin-left: calc(150px + var(--login-gap));
+      max-width: var(--login-field-max);
+    }
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      color: #6b7280;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .login-divider::before,
+    .login-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--login-divider);
+    }
+    .login-btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px 18px;
+      background: #fff;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid #d1d5db;
+      border-radius: 0;
+      transition: background-color 120ms ease, border-color 120ms ease;
+    }
+    .login-btn-google:hover {
+      background: #fafafa;
+      border-color: #9ca3af;
+    }
+    .login-oauth-hint {
+      margin: 14px 0 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #4b5563;
+    }
+    .login-oauth-hint a {
+      color: var(--login-brand);
+      font-weight: 700;
+    }
+    .login-footer {
+      flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 32px var(--login-gutter-x) 40px;
+      box-sizing: border-box;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--login-text);
+    }
+    .login-footer p { margin: 0 0 10px; }
+    .login-footer a {
+      color: var(--login-brand);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .login-footer a:hover { color: #002878; }
+    .login-footer__muted {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .login-footer__muted a { font-weight: 700; }
+    .login-shell__panel--visual {
+      min-height: 0;
+      background-color: #1a1a1a;
+      background-image: url("{{ asset('img/holiday sale.png') }}");
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+    @media (max-width: 900px) {
+      .login-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(38vh, auto) 1fr;
+      }
+      .login-shell__panel--visual {
+        min-height: 38vh;
+        order: -1;
+      }
+      .login-shell__panel--form {
+        min-height: 0;
+      }
+    }
+    @media (max-width: 560px) {
+      .login-row {
+        grid-template-columns: 1fr;
+        margin-bottom: 16px;
+      }
+      .login-row label { margin-bottom: 4px; }
+      .login-actions,
+      .login-oauth-block {
+        margin-left: 0;
+        max-width: none;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+<div class="login-page-with-header">
+  {% include 'shared/header.html.twig' %}
+  <div class="login-shell">
+  <div class="login-shell__panel login-shell__panel--form">
+    <div class="login-shell__scroll">
+      <header class="login-page__intro">
+        <h1 class="login-page__title">Sign in to your account</h1>
+        <p class="login-page__sub">Unlock exclusive sale previews, save your shopping details, and Wishlist your favourites for a seamless checkout.</p>
+      </header>
+
+      <div class="login-alerts">
+        {% for message in app.flashes('success') %}
+          <div class="login-success">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+          <div class="login-error">{{ message }}</div>
+        {% endfor %}
+        {% if error %}
+          <div class="login-error">
+            {% if error.messageKey is defined %}
+              {{ error.messageKey|trans(error.messageData, 'security') }}
+            {% else %}
+              {{ error }}
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="login-matrix">
+        <form method="post" action="{{ path('customer_login') }}" data-turbo="false">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token('customer_authenticate') }}">
+
+          <div class="login-row">
+            <label for="email">Email address</label>
+            <input class="login-input" type="email" id="email" name="email" autocomplete="email" required value="{{ last_username }}">
+          </div>
+          <div class="login-row">
+            <label for="password">Password</label>
+            <input class="login-input" type="password" id="password" name="password" autocomplete="current-password" required>
+          </div>
+
+          <div class="login-actions">
+            <button class="login-btn-primary" type="submit">Access your account</button>
+          </div>
+        </form>
+
+        <div class="login-oauth-block">
+          <div class="login-divider" role="separator" aria-label="Alternative sign-in">Or</div>
+          <a
+            href="{{ path('customer_login_google') }}"
+            data-turbo="false"
+            class="login-btn-google"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.22 3.2l6.85-6.85C35.9 2.98 30.41 1 24 1 14.62 1 6.5 6.3 2.55 14.2l7.98 6.2C12.5 13.6 17.8 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.14-3.06-.41-4.53H24v9.01h12.54c-.54 2.9-2.1 5.36-4.46 7.01l7.3 5.67c4.26-3.93 6.6-9.72 6.6-16.16z"/>
+              <path fill="#FBBC05" d="M10.53 28.8c-.98-2.92-.98-6.1 0-9.02l-7.98-6.2C-.92 18.74-1 23.2 1.06 27.68l9.47 1.12z"/>
+              <path fill="#34A853" d="M24 47c6.41 0 11.9-2.12 15.87-5.75l-7.3-5.67c-2.03 1.37-4.63 2.17-8.57 2.17-6.2 0-11.5-4.1-13.47-9.9l-7.98 6.2C6.5 41.7 14.62 47 24 47z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </a>
+          <p class="login-oauth-hint">Use Google only if that account is already linked here. New customers: use <strong>Continue with Google</strong> on the <a href="{{ path('customer_signup') }}">Sign up</a> page first.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="login-footer">
+      <p>Forgot your password? <a href="#">Click here</a> to reset</p>
+      <p>Need help? <a href="{{ path('public_contact') }}">Contact us.</a></p>
+      <p class="login-footer__muted">No account yet? <a href="{{ path('customer_signup') }}">Sign up</a></p>
+    </footer>
+  </div>
+
+    <div class="login-shell__panel login-shell__panel--visual" role="presentation" aria-hidden="true"></div>
+  </div>
+
+  {% include 'shared/footer.html.twig' %}
+</div>
+{% endblock %}

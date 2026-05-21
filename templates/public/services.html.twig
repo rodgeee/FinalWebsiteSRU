@@ -1,0 +1,155 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}Shoe Cleaning Services • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-route-services{% endblock %}
+
+{% block public_page_stylesheets %}
+  <meta name="turbo-cache-control" content="no-cache">
+  <link rel="stylesheet" href="{{ asset('styles/services-page.css') }}" data-turbo-track="reload">
+{% endblock %}
+
+{% block public_page_body %}
+  <main class="lp-page lp-page--services" id="services-main">
+    <header class="lp-services-hero">
+      <div class="lp-services-hero__scrim" aria-hidden="true"></div>
+      <div class="lp-services-wrap lp-services-hero__grid">
+        <div class="lp-services-hero__copy">
+          <p class="lp-services-hero__eyebrow">{{ servicesHero.eyebrow|default("Shoes R' Us · Care Lab") }}</p>
+          <h1 class="lp-services-hero__title">{{ servicesHero.title|default('Professional shoe cleaning, built for sneakerheads') }}</h1>
+          <p class="lp-services-hero__lead">{{ servicesHero.lead|default('Hand-cleaned pairs with color-safe care and careful drying.') }}</p>
+          <div class="lp-services-hero__actions">
+            <a href="#packages" class="lp-services-hero__cta lp-services-hero__cta--primary">View packages</a>
+            <a href="{{ path('public_contact') }}" class="lp-services-hero__cta lp-services-hero__cta--ghost">Book / inquire</a>
+          </div>
+        </div>
+        {% if servicesHero.image|default('') %}
+          <figure class="lp-services-hero__figure">
+            <img
+              class="lp-services-hero__photo"
+              src="{{ asset('img/' ~ servicesHero.image) }}"
+              alt="{{ servicesHero.image_alt|default('Sneaker') }}"
+              width="560"
+              height="560"
+              decoding="async"
+            >
+          </figure>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if servicesStats is not empty %}
+      <section class="lp-services-stats" aria-label="Service highlights">
+        <div class="lp-services-wrap">
+          <ul class="lp-services-stats__list" role="list">
+            {% for stat in servicesStats %}
+              <li>
+                <span class="lp-services-stats__value">{{ stat.value }}</span>
+                <span class="lp-services-stats__label">{{ stat.label }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </section>
+    {% endif %}
+
+    <section class="lp-services-section" id="packages" aria-labelledby="packages-heading">
+      <div class="lp-services-wrap">
+        <header class="lp-services-section__head">
+          <p class="lp-services-section__eyebrow">Packages</p>
+          <h2 id="packages-heading" class="lp-services-section__title">Choose the clean your pair deserves</h2>
+          <p class="lp-services-section__lead">Transparent tiers—no surprises at pickup. Pricing shown per pair; bundles available in store.</p>
+        </header>
+
+        <div class="lp-services-packages" role="list">
+          {% for pkg in servicePackages %}
+            <article class="lp-services-package{{ pkg.featured|default(false) ? ' lp-services-package--featured' : '' }}" role="listitem">
+              {% if pkg.featured|default(false) %}
+                <span class="lp-services-package__badge">Most popular</span>
+              {% endif %}
+              <h3 class="lp-services-package__name">{{ pkg.name }}</h3>
+              <p class="lp-services-package__price">{{ pkg.price }}</p>
+              <p class="lp-services-package__tagline">{{ pkg.tagline }}</p>
+              <ul class="lp-services-package__list">
+                {% for item in pkg.includes|default([]) %}
+                  <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+              <a href="{{ path('public_contact') }}" class="lp-services-package__cta">Book this package</a>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-services-section lp-services-section--muted" id="process" aria-labelledby="process-heading">
+      <div class="lp-services-wrap">
+        <header class="lp-services-section__head">
+          <p class="lp-services-section__eyebrow">How it works</p>
+          <h2 id="process-heading" class="lp-services-section__title">From drop-off to fresh out the bag</h2>
+          <p class="lp-services-section__lead">Every pair is tagged, photographed, and tracked so you know exactly what we did.</p>
+        </header>
+
+        <ol class="lp-services-process">
+          {% for step in serviceProcess %}
+            <li class="lp-services-process__step">
+              <span class="lp-services-process__num">{{ step.step }}</span>
+              <h3 class="lp-services-process__title">{{ step.title }}</h3>
+              <p class="lp-services-process__text">{{ step.text }}</p>
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
+    </section>
+
+    {% if serviceCareNotes is not empty %}
+      <section class="lp-services-section" aria-labelledby="care-heading">
+        <div class="lp-services-wrap">
+          <header class="lp-services-section__head">
+            <p class="lp-services-section__eyebrow">Our standard</p>
+            <h2 id="care-heading" class="lp-services-section__title">Care that respects the materials</h2>
+          </header>
+          <div class="lp-services-care">
+            {% for note in serviceCareNotes %}
+              <article class="lp-services-care__card">
+                <h3 class="lp-services-care__title">{{ note.title }}</h3>
+                <p class="lp-services-care__text">{{ note.text }}</p>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    {% endif %}
+
+    {% if serviceFaq is not empty %}
+      <section class="lp-services-section lp-services-section--muted" id="faq" aria-labelledby="faq-heading">
+        <div class="lp-services-wrap">
+          <header class="lp-services-section__head">
+            <p class="lp-services-section__eyebrow">FAQ</p>
+            <h2 id="faq-heading" class="lp-services-section__title">Common questions</h2>
+          </header>
+          <div class="lp-services-faq">
+            {% for item in serviceFaq %}
+              <details class="lp-services-faq__item">
+                <summary>{{ item.q }}</summary>
+                <p>{{ item.a }}</p>
+              </details>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    {% endif %}
+
+    <section class="lp-services-cta" aria-labelledby="services-cta-heading">
+      <div class="lp-services-wrap">
+        <div class="lp-services-cta__inner">
+          <div>
+            <h2 id="services-cta-heading" class="lp-services-cta__title">Ready to revive your rotation?</h2>
+            <p class="lp-services-cta__text">Drop by the store or reach out—we'll confirm materials, timeline, and the right package before we start.</p>
+          </div>
+          <a href="{{ path('public_contact') }}" class="lp-services-cta__btn">Contact us</a>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}

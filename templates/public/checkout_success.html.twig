@@ -1,0 +1,37 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}Order confirmed • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-checkout-page{% endblock %}
+
+{% block public_page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/checkout-page.css') }}">
+{% endblock %}
+
+{% block public_page_body %}
+    <main class="lp-checkout lp-checkout--success">
+        <div class="lp-checkout__success-card">
+            <h1 class="lp-checkout__title">Thank you!</h1>
+            <p class="lp-checkout__success-lead">Your order <strong>{{ order.displayOrderNumber }}</strong> has been placed.</p>
+            <dl class="lp-checkout__success-meta">
+                <div>
+                    <dt>Status</dt>
+                    <dd>{{ order.orderStatus }}</dd>
+                </div>
+                <div>
+                    <dt>Total</dt>
+                    <dd>₱{{ order.totalPrice|number_format(0, '.', ',') }}</dd>
+                </div>
+                <div>
+                    <dt>Payment</dt>
+                    <dd>{{ order.paymentMethod }}</dd>
+                </div>
+            </dl>
+            <p class="lp-checkout__success-note">We will process your order shortly. Track it anytime from your account.</p>
+            <div class="lp-checkout__success-actions">
+                <a href="{{ path('customer_account', { tab: 'orders' }) }}" class="lp-cart__btn lp-cart__btn--primary" data-turbo-frame="_top">View orders</a>
+                <a href="{{ path('public_releases') }}" class="lp-cart__btn lp-cart__btn--ghost" data-turbo-frame="_top">Continue shopping</a>
+            </div>
+        </div>
+    </main>
+{% endblock %}

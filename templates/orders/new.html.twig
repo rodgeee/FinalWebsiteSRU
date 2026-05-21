@@ -1,0 +1,103 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}New Order • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[700px] p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Create Order</h1>
+      <a href="{{ path('admin_orders_index') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all">Back</a>
+    </div>
+
+    <div class="rounded-xl border border-border bg-white shadow-card p-4">
+      {{ form_start(form) }}
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            {{ form_label(form.CustomerName) }}
+            {{ form_widget(form.CustomerName) }}
+            {{ form_errors(form.CustomerName) }}
+          </div>
+          <div>
+            {{ form_label(form.Email) }}
+            {{ form_widget(form.Email) }}
+            {{ form_errors(form.Email) }}
+          </div>
+          <div>
+            {{ form_label(form.Products) }}
+            {{ form_widget(form.Products) }}
+            {{ form_errors(form.Products) }}
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              {{ form_label(form.Quantity) }}
+              {{ form_widget(form.Quantity) }}
+              {{ form_errors(form.Quantity) }}
+            </div>
+            <div>
+              {{ form_label(form.TotalPrice) }}
+              {{ form_widget(form.TotalPrice) }}
+              {{ form_errors(form.TotalPrice) }}
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              {{ form_label(form.PaymentMethod) }}
+              {{ form_widget(form.PaymentMethod) }}
+              {{ form_errors(form.PaymentMethod) }}
+            </div>
+            <div>
+              {{ form_label(form.OrderStatus) }}
+              {{ form_widget(form.OrderStatus) }}
+              {{ form_errors(form.OrderStatus) }}
+            </div>
+          </div>
+          <div>
+            {{ form_label(form.TrackingNumber) }}
+            {{ form_widget(form.TrackingNumber) }}
+            {{ form_errors(form.TrackingNumber) }}
+          </div>
+          <div>
+            {{ form_label(form.Remarks) }}
+            {{ form_widget(form.Remarks) }}
+            {{ form_errors(form.Remarks) }}
+          </div>
+        </div>
+        <div class="mt-4 flex items-center gap-2">
+          <button class="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg" type="submit">
+            <i data-lucide="check" class="h-4 w-4"></i>
+            Create Order
+          </button>
+          <a href="{{ path('admin_orders_index') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all">Cancel</a>
+        </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const productSelect = document.querySelector('[data-product-select]');
+      const priceInput = document.querySelector('[data-total-price]');
+
+      const setPriceFromSelection = () => {
+        if (!productSelect || !priceInput) return;
+        const option = productSelect.selectedOptions?.[0];
+        const price = option?.dataset?.price;
+        if (price && !Number.isNaN(Number(price))) {
+          priceInput.value = Number(price).toFixed(2);
+        }
+      };
+
+      if (productSelect) {
+        productSelect.addEventListener('change', setPriceFromSelection);
+        setPriceFromSelection();
+      }
+    });
+  </script>
+{% endblock %}
+
+
+

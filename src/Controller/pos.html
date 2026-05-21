@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/site-fonts.css">
+  <title>3cm Hardware &amp; Construction Supply - POS System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    .font-display {
+      font-family: "Sora", sans-serif;
+      font-weight: 700;
+    }
+    
+    .font-body {
+      font-family: sans-serif;
+    }
+    
+    body {
+      font-family: sans-serif;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    .animate-slide-up {
+      animation: slideUp 0.5s ease-out;
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    .animate-scale-in {
+      animation: scaleIn 0.3s ease-out;
+    }
+    
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-primary {
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+    
+    .loading-shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, var(--tw-gradient-stops));
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 150px;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      transform: translate(30%, -30%);
+    }
+    
+    .product-card {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .product-card:hover {
+      background: linear-gradient(to right, #fef3c7, #fde68a);
+      transform: translateX(4px);
+      border-left: 4px solid #f59e0b;
+    }
+    
+    .low-stock-badge {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: .7;
+      }
+    }
+    
+    .nav-item {
+      transition: all 0.2s ease;
+    }
+    
+    .nav-item:hover {
+      background: rgba(251, 191, 36, 0.1);
+      transform: translateX(4px);
+    }
+    
+    .nav-item.active {
+      background: linear-gradient(to right, #fbbf24, #f59e0b);
+      color: white;
+      border-left: 4px solid #d97706;
+    }
+    
+    .modal-backdrop {
+      backdrop-filter: blur(8px);
+    }
+    
+    .toast {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+    
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto bg-gradient-to-br from-slate-50 via-amber-50 to-slate-100"><!-- LOGIN SCREEN -->
+  <div id="login-screen" class="w-full min-h-full flex items-center justify-center p-6">
+   <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in"><!-- Header with gradient -->
+    <div class="bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-8 text-center relative overflow-hidden">
+     <div class="absolute inset-0 bg-black opacity-5"></div>
+     <div class="relative z-10">
+      <div class="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 shadow-lg">
+       <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+       </svg>
+      </div>
+      <h1 class="text-3xl font-display font-bold text-white mb-2">3cm Hardware</h1>
+      <p class="text-amber-100 font-semibold">Construction Supply POS</p>
+     </div>
+    </div>
+    <div class="p-8">
+     <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Sign In</h2>
+     <form id="login-form" class="space-y-5">
+      <div><label for="username" class="block text-sm font-semibold text-slate-700 mb-2">Username</label> <input type="text" id="username" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition" placeholder="Enter your username" required>
+      </div>
+      <div><label for="password" class="block text-sm font-semibold text-slate-700 mb-2">Password</label> <input type="password" id="password" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition" placeholder="Enter your password" required>
+      </div>
+      <div id="login-error" class="hidden bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium"></div><button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3.5 rounded-xl shadow-lg btn-primary"> <span class="flex items-center justify-center space-x-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+        </svg><span>Sign In to POS</span> </span> </button>
+     </form>
+     <div class="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
+      <p class="text-sm font-bold text-blue-900 mb-3">Demo Accounts:</p>
+      <div class="space-y-2">
+       <div class="bg-white p-3 rounded-lg">
+        <p class="text-xs font-semibold text-slate-600">ADMIN ACCESS</p>
+        <p class="text-sm font-mono text-slate-800"><strong>admin</strong> / <strong>admin123</strong></p>
+       </div>
+       <div class="bg-white p-3 rounded-lg">
+        <p class="text-xs font-semibold text-slate-600">EMPLOYEE ACCESS</p>
+        <p class="text-sm font-mono text-slate-800"><strong>employee</strong> / <strong>emp123</strong></p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- MAIN APPLICATION -->
+  <div id="main-app" class="hidden w-full min-h-full flex flex-col"><!-- TOP NAVIGATION BAR -->
+   <nav class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 shadow-xl sticky top-0 z-40">
+    <div class="px-6 py-4">
+     <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+       <div class="flex items-center space-x-3">
+        <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+         </svg>
+        </div>
+        <div>
+         <h1 class="text-xl font-display font-bold text-white tracking-wide">3cm HARDWARE</h1>
+         <p class="text-xs text-amber-100 font-semibold">Construction Supply POS System</p>
+        </div>
+       </div>
+      </div>
+      <div class="flex items-center space-x-6">
+       <div class="text-right">
+        <p class="text-sm text-amber-100 font-medium">Logged in as</p>
+        <p class="text-white font-bold text-lg" id="logged-user">Admin User</p>
+       </div><button id="logout-btn" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl transition font-semibold flex items-center space-x-2 shadow-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg><span>Logout</span> </button>
+      </div>
+     </div>
+    </div>
+   </nav>
+   <div class="flex flex-1"><!-- SIDEBAR NAVIGATION -->
+    <aside class="w-72 bg-white shadow-xl border-r-2 border-amber-100">
+     <nav class="p-4 space-y-2"><button class="nav-item w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-left" data-view="dashboard">
+       <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+       </svg><span class="font-bold text-slate-700 text-base">Dashboard</span> </button> <button class="nav-item w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-left" data-view="pos">
+       <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+       </svg><span class="font-bold text-slate-700 text-base">Point of Sale</span> </button> <button class="nav-item admin-only w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-left" data-view="inventory">
+       <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+       </svg><span class="font-bold text-slate-700 text-base">Inventory</span> </button> <button class="nav-item w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-left" data-view="sales">
+       <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+       </svg><span class="font-bold text-slate-700 text-base">Sales History</span> </button> <button class="nav-item admin-only w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-left" data-view="reports">
+       <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+       </svg><span class="font-bold text-slate-700 text-base">Reports</span> </button>
+     </nav><!-- Sample Data Button -->
+     <div id="sample-data-container" class="p-4 border-t-2 border-amber-100">
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-4">
+       <div class="flex items-start space-x-3 mb-3">
+        <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+         <p class="text-sm font-bold text-blue-900 mb-1">First Time Setup</p>
+         <p class="text-xs text-blue-700 leading-relaxed">Click below to load 20+ sample hardware products</p>
+        </div>
+       </div><button id="load-sample-btn" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-2.5 rounded-lg shadow-lg btn-primary text-sm"> Load Sample Products </button>
+      </div>
+     </div>
+    </aside><!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-6 overflow-y-auto"><!-- DASHBOARD VIEW -->
+     <div id="dashboard-view" class="view-content animate-fade-in">
+      <div class="mb-8">
+       <h2 class="text-4xl font-display font-bold text-slate-800 mb-2">Dashboard</h2>
+       <p class="text-slate-600 text-lg">Real-time overview of your hardware store operations</p>
+      </div><!-- STATS GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"><!-- Today's Sales -->
+       <div class="stat-card from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white card-hover">
+        <div class="relative z-10">
+         <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+           </svg>
+          </div>
+         </div>
+         <p class="text-blue-100 text-sm font-semibold mb-1 uppercase tracking-wide">Today's Sales</p>
+         <p class="text-4xl font-bold" id="stat-today-sales">₱0.00</p>
+        </div>
+       </div><!-- Total Products -->
+       <div class="stat-card from-emerald-500 to-green-600 rounded-2xl shadow-xl p-6 text-white card-hover">
+        <div class="relative z-10">
+         <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+           </svg>
+          </div>
+         </div>
+         <p class="text-green-100 text-sm font-semibold mb-1 uppercase tracking-wide">Total Products</p>
+         <p class="text-4xl font-bold" id="stat-total-products">0</p>
+        </div>
+       </div><!-- Low Stock Items -->
+       <div class="stat-card admin-only from-orange-500 to-red-500 rounded-2xl shadow-xl p-6 text-white card-hover">
+        <div class="relative z-10">
+         <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+           </svg>
+          </div>
+         </div>
+         <p class="text-orange-100 text-sm font-semibold mb-1 uppercase tracking-wide">Low Stock Alert</p>
+         <p class="text-4xl font-bold" id="stat-low-stock">0</p>
+        </div>
+       </div><!-- Total Transactions -->
+       <div class="stat-card from-purple-500 to-pink-500 rounded-2xl shadow-xl p-6 text-white card-hover">
+        <div class="relative z-10">
+         <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+           <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+           </svg>
+          </div>
+         </div>
+         <p class="text-purple-100 text-sm font-semibold mb-1 uppercase tracking-wide">Transactions</p>
+         <p class="text-4xl font-bold" id="stat-total-transactions">0</p>
+        </div>
+       </div>
+      </div><!-- RECENT ACTIVITY -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Recent Sales -->
+       <div class="bg-white rounded-2xl shadow-xl p-6">
+        <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+         <svg class="w-6 h-6 text-amber-500 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+         </svg> Recent Transactions</h3>
+        <div id="recent-transactions" class="space-y-3 max-h-96 overflow-y-auto"><!-- Will be populated -->
+        </div>
+       </div><!-- Low Stock Alerts -->
+       <div class="admin-only bg-white rounded-2xl shadow-xl p-6">
+        <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+         <svg class="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+         </svg> Low Stock Alert</h3>
+        <div id="low-stock-items" class="space-y-3 max-h-96 overflow-y-auto"><!-- Will be populated -->
+        </div>
+       </div>
+      </div>
+     </div><!-- POS VIEW -->
+     <div id="pos-view" class="view-content hidden">
+      <div class="mb-8">
+       <h2 class="text-4xl font-display font-bold text-slate-800 mb-2">Point of Sale</h2>
+       <p class="text-slate-600 text-lg">Process customer transactions efficiently</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><!-- Product Selection -->
+       <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl p-6">
+        <div class="mb-6"><label class="block text-sm font-bold text-slate-700 mb-2">Search Products</label> <input type="text" id="product-search" placeholder="Search by name, SKU, or category..." class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition">
+        </div>
+        <div id="products-list" class="space-y-2 max-h-[600px] overflow-y-auto"><!-- Products will be listed here -->
+        </div>
+       </div><!-- Cart & Checkout -->
+       <div class="bg-white rounded-2xl shadow-xl p-6 h-fit sticky top-6">
+        <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+         <svg class="w-6 h-6 text-amber-500 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+         </svg> Shopping Cart</h3>
+        <div id="cart-items" class="space-y-3 mb-6 max-h-64 overflow-y-auto"><!-- Cart items -->
+        </div>
+        <div class="border-t-2 border-slate-200 pt-4 space-y-3 mb-6">
+         <div class="flex justify-between text-slate-600 font-medium"><span>Subtotal:</span> <span id="cart-subtotal">₱0.00</span>
+         </div>
+         <div class="flex justify-between text-slate-600 font-medium"><span>Items:</span> <span id="cart-count">0</span>
+         </div>
+         <div class="flex justify-between text-2xl font-bold text-slate-800"><span>Total:</span> <span id="cart-total" class="text-amber-600">₱0.00</span>
+         </div>
+        </div>
+        <div class="mb-4"><label class="block text-sm font-bold text-slate-700 mb-2">Payment Method</label> <select id="payment-method" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition"> <option value="Cash">Cash</option> <option value="Card">Debit/Credit Card</option> <option value="GCash">GCash</option> <option value="PayMaya">PayMaya</option> <option value="Bank Transfer">Bank Transfer</option> </select>
+        </div><button id="checkout-btn" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-4 rounded-xl shadow-lg btn-primary disabled:opacity-50 disabled:cursor-not-allowed mb-3" disabled> <span class="flex items-center justify-center space-x-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg><span>Complete Sale</span> </span> </button> <button id="clear-cart-btn" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition"> Clear Cart </button>
+       </div>
+      </div>
+     </div><!-- INVENTORY VIEW -->
+     <div id="inventory-view" class="view-content hidden">
+      <div class="mb-8 flex items-center justify-between">
+       <div>
+        <h2 class="text-4xl font-display font-bold text-slate-800 mb-2">Inventory Management</h2>
+        <p class="text-slate-600 text-lg">Manage your product catalog and stock levels</p>
+       </div><button id="add-product-btn" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg btn-primary flex items-center space-x-2">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg><span>Add Product</span> </button>
+      </div><!-- Category Filter -->
+      <div class="mb-6 flex flex-wrap gap-3"><button class="category-filter bg-gradient-to-r from-amber-500 to-orange-500 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg" data-category="all"> All Products </button> <button class="category-filter bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold" data-category="Cement &amp; Concrete"> Cement &amp; Concrete </button> <button class="category-filter bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold" data-category="Steel &amp; Metals"> Steel &amp; Metals </button> <button class="category-filter bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold" data-category="Lumber &amp; Wood"> Lumber &amp; Wood </button> <button class="category-filter bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold" data-category="Paint &amp; Coating"> Paint &amp; Coating </button> <button class="category-filter bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold" data-category="Tools &amp; Equipment"> Tools &amp; Equipment </button>
+      </div>
+      <div id="inventory-table-container" class="bg-white rounded-2xl shadow-xl overflow-hidden"><!-- Inventory table will be rendered here -->
+      </div>
+     </div><!-- SALES HISTORY VIEW -->
+     <div id="sales-view" class="view-content hidden">
+      <div class="mb-8">
+       <h2 class="text-4xl font-display font-bold text-slate-800 mb-2">Sales History</h2>
+       <p class="text-slate-600 text-lg">View all completed transactions and receipts</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-gradient-to-r from-amber-100 to-orange-100 border-b-2 border-amber-200">
+          <tr>
+           <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Sale ID</th>
+           <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Date &amp; Time</th>
+           <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Items</th>
+           <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Payment</th>
+           <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Total</th>
+           <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Cashier</th>
+          </tr>
+         </thead>
+         <tbody id="sales-table" class="divide-y divide-slate-200"><!-- Sales will be rendered here -->
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- REPORTS VIEW -->
+     <div id="reports-view" class="view-content hidden">
+      <div class="mb-8">
+       <h2 class="text-4xl font-display font-bold text-slate-800 mb-2">Reports &amp; Analytics</h2>
+       <p class="text-slate-600 text-lg">Detailed sales and inventory analysis</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"><!-- Sales by Category -->
+       <div class="bg-white rounded-2xl shadow-xl p-6">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">Sales by Category</h3>
+        <div id="sales-by-category" class="space-y-3"><!-- Will be populated -->
+        </div>
+       </div><!-- Top Products -->
+       <div class="bg-white rounded-2xl shadow-xl p-6">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">Top Selling Products</h3>
+        <div id="top-products" class="space-y-3"><!-- Will be populated -->
+        </div>
+       </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-xl p-6">
+       <h3 class="text-xl font-bold text-slate-800 mb-4">Inventory Value</h3>
+       <div id="inventory-value" class="space-y-3"><!-- Will be populated -->
+       </div>
+      </div>
+     </div>
+    </main>
+   </div>
+  </div><!-- ADD/EDIT PRODUCT MODAL -->
+  <div id="product-modal" class="hidden fixed inset-0 bg-black/60 modal-backdrop flex items-center justify-center z-50 p-4">
+   <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-screen overflow-y-auto animate-scale-in">
+    <div class="sticky top-0 bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 flex items-center justify-between z-10">
+     <h3 class="text-2xl font-display font-bold text-white" id="modal-title">Add New Product</h3><button id="close-modal-btn" class="text-white hover:bg-white/20 p-2 rounded-lg transition">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg></button>
+    </div>
+    <form id="product-form" class="p-6 space-y-5"><input type="hidden" id="edit-product-id">
+     <div class="grid grid-cols-2 gap-5">
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Product Name *</label> <input type="text" id="product-name" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition">
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">SKU *</label> <input type="text" id="product-sku" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition">
+      </div>
+     </div>
+     <div class="grid grid-cols-2 gap-5">
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Category *</label> <select id="product-category" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition"> <option value="">Select Category</option> <option value="Cement &amp; Concrete">Cement &amp; Concrete</option> <option value="Steel &amp; Metals">Steel &amp; Metals</option> <option value="Lumber &amp; Wood">Lumber &amp; Wood</option> <option value="Paint &amp; Coating">Paint &amp; Coating</option> <option value="Plumbing">Plumbing</option> <option value="Electrical">Electrical</option> <option value="Tools &amp; Equipment">Tools &amp; Equipment</option> <option value="Hardware &amp; Fasteners">Hardware &amp; Fasteners</option> </select>
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Supplier</label> <input type="text" id="product-supplier" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition">
+      </div>
+     </div>
+     <div class="grid grid-cols-3 gap-5">
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Price (₱) *</label> <input type="number" id="product-price" step="0.01" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition">
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Stock Quantity *</label> <input type="number" id="product-stock" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition">
+      </div>
+      <div><label class="block text-sm font-bold text-slate-700 mb-2">Reorder Level</label> <input type="number" id="product-reorder" value="10" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl transition">
+      </div>
+     </div>
+     <div class="flex space-x-4 pt-4"><button type="submit" class="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-4 rounded-xl shadow-lg btn-primary"> Save Product </button> <button type="button" id="cancel-modal-btn" class="px-10 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-4 rounded-xl transition"> Cancel </button>
+     </div>
+    </form>
+   </div>
+  </div><!-- SUCCESS TOAST -->
+  <div id="success-toast" class="hidden fixed top-6 right-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 animate-slide-up flex items-center space-x-3 toast">
+   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+   </svg><span id="toast-message" class="font-semibold">Success!</span>
+  </div>
+  <script>
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    let currentUser = null;
+    let currentRole = null;
+    let currentView = 'dashboard';
+    let currentCategory = 'all';
+    let cart = [];
+    let allData = [];
+    let sampleDataLoaded = false;
+
+    // ============================================
+    // SAMPLE DATA
+    // ============================================
+    const SAMPLE_PRODUCTS = [
+      { type: 'product', name: 'Portland Cement 40kg', sku: 'CEM-001', category: 'Cement & Concrete', price: 245.00, stock: 150, reorderLevel: 20, supplier: 'Republic Cement' },
+      { type: 'product', name: 'Ordinary Portland Cement 50kg', sku: 'CEM-002', category: 'Cement & Concrete', price: 285.00, stock: 120, reorderLevel: 20, supplier: 'Holcim Philippines' },
+      { type: 'product', name: 'Ready-Mix Concrete per cu.m', sku: 'CEM-003', category: 'Cement & Concrete', price: 4500.00, stock: 8, reorderLevel: 5, supplier: 'Island Cement' },
+      { type: 'product', name: 'Reinforcement Steel Bar 10mm x 6m', sku: 'STL-001', category: 'Steel & Metals', price: 385.00, stock: 200, reorderLevel: 30, supplier: 'SteelAsia' },
+      { type: 'product', name: 'Reinforcement Steel Bar 12mm x 6m', sku: 'STL-002', category: 'Steel & Metals', price: 525.00, stock: 180, reorderLevel: 30, supplier: 'SteelAsia' },
+      { type: 'product', name: 'Reinforcement Steel Bar 16mm x 6m', sku: 'STL-003', category: 'Steel & Metals', price: 895.00, stock: 150, reorderLevel: 25, supplier: 'SteelAsia' },
+      { type: 'product', name: 'G.I. Sheet 0.5mm Gauge', sku: 'STL-004', category: 'Steel & Metals', price: 645.00, stock: 75, reorderLevel: 15, supplier: 'Jinwoo Metal' },
+      { type: 'product', name: 'Hollow Blocks 4" CHB', sku: 'CEM-004', category: 'Cement & Concrete', price: 12.50, stock: 3000, reorderLevel: 500, supplier: 'Local Supplier' },
+      { type: 'product', name: 'Marine Plywood 1/4" x 4x8', sku: 'WOD-001', category: 'Lumber & Wood', price: 685.00, stock: 85, reorderLevel: 20, supplier: 'Duraply' },
+      { type: 'product', name: 'Marine Plywood 1/2" x 4x8', sku: 'WOD-002', category: 'Lumber & Wood', price: 1285.00, stock: 60, reorderLevel: 15, supplier: 'Duraply' },
+      { type: 'product', name: 'Coco Lumber 2x2 x 10ft', sku: 'WOD-003', category: 'Lumber & Wood', price: 125.00, stock: 250, reorderLevel: 50, supplier: 'Local Lumber' },
+      { type: 'product', name: 'Coco Lumber 2x3 x 10ft', sku: 'WOD-004', category: 'Lumber & Wood', price: 185.00, stock: 200, reorderLevel: 40, supplier: 'Local Lumber' },
+      { type: 'product', name: 'Davies Paint Latex 4L White', sku: 'PNT-001', category: 'Paint & Coating', price: 1450.00, stock: 45, reorderLevel: 10, supplier: 'Davies Paints' },
+      { type: 'product', name: 'Boysen Paint Latex 4L White', sku: 'PNT-002', category: 'Paint & Coating', price: 1525.00, stock: 40, reorderLevel: 10, supplier: 'Boysen Paints' },
+      { type: 'product', name: 'Paint Roller 9"', sku: 'TLS-001', category: 'Tools & Equipment', price: 85.00, stock: 120, reorderLevel: 25, supplier: 'Stanley Tools' },
+      { type: 'product', name: 'Paint Brush Set 3pcs', sku: 'TLS-002', category: 'Tools & Equipment', price: 145.00, stock: 95, reorderLevel: 20, supplier: 'Stanley Tools' },
+      { type: 'product', name: 'PVC Pipe 1/2" x 3m', sku: 'PLM-001', category: 'Plumbing', price: 95.00, stock: 280, reorderLevel: 50, supplier: 'Westpoint' },
+      { type: 'product', name: 'PVC Pipe 3/4" x 3m', sku: 'PLM-002', category: 'Plumbing', price: 135.00, stock: 250, reorderLevel: 50, supplier: 'Westpoint' },
+      { type: 'product', name: 'Electrical Wire #12 THHN per meter', sku: 'ELC-001', category: 'Electrical', price: 28.50, stock: 500, reorderLevel: 100, supplier: 'Philippine Wiring' },
+      { type: 'product', name: 'Electrical Wire #14 THHN per meter', sku: 'ELC-002', category: 'Electrical', price: 22.50, stock: 600, reorderLevel: 100, supplier: 'Philippine Wiring' },
+      { type: 'product', name: 'Common Wire Nails 2" per kilo', sku: 'HRD-001', category: 'Hardware & Fasteners', price: 85.00, stock: 150, reorderLevel: 30, supplier: 'Local Hardware' },
+      { type: 'product', name: 'Common Wire Nails 3" per kilo', sku: 'HRD-002', category: 'Hardware & Fasteners', price: 88.00, stock: 140, reorderLevel: 30, supplier: 'Local Hardware' },
+      { type: 'product', name: 'Masonry Trowel', sku: 'TLS-003', category: 'Tools & Equipment', price: 195.00, stock: 55, reorderLevel: 15, supplier: 'Stanley Tools' },
+      { type: 'product', name: 'Claw Hammer 16oz', sku: 'TLS-004', category: 'Tools & Equipment', price: 285.00, stock: 70, reorderLevel: 15, supplier: 'Stanley Tools' }
+    ];
+
+    // ============================================
+    // DATA SDK SETUP
+    // ============================================
+    const dataHandler = {
+      onDataChanged(data) {
+        allData = data;
+        
+        // Check if we have products
+        const products = getProducts();
+        if (products.length > 0) {
+          sampleDataLoaded = true;
+          const container = document.getElementById('sample-data-container');
+          if (container) {
+            container.style.display = 'none';
+          }
+        }
+        
+        renderAllViews();
+      }
+    };
+
+    async function initDataSdk() {
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) {
+        console.error('Failed to initialize Data SDK');
+      }
+    }
+
+    // ============================================
+    // LOAD SAMPLE DATA
+    // ============================================
+    document.getElementById('load-sample-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('load-sample-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-shimmer">Loading Products...</span>';
+      
+      for (const product of SAMPLE_PRODUCTS) {
+        const result = await window.dataSdk.create(product);
+        if (!result.isOk) {
+          showToast('Error loading products. Please try again.');
+          btn.disabled = false;
+          btn.innerHTML = 'Load Sample Products';
+          return;
+        }
+      }
+      
+      showToast('20+ sample products loaded successfully!');
+      sampleDataLoaded = true;
+      
+      const container = document.getElementById('sample-data-container');
+      if (container) {
+        container.style.display = 'none';
+      }
+    });
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    function formatCurrency(amount) {
+      return '₱' + parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    function formatDateTime(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleString('en-PH', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function generateId(prefix) {
+      return prefix + '-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('success-toast');
+      const toastMessage = document.getElementById('toast-message');
+      toastMessage.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    // ============================================
+    // LOGIN SYSTEM
+    // ============================================
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.toLowerCase();
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('login-error');
+
+      if (username === 'admin' && password === 'admin123') {
+        currentUser = 'Admin User';
+        currentRole = 'admin';
+        document.getElementById('logged-user').textContent = currentUser;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        updateUIForRole();
+        showView('dashboard');
+        errorEl.classList.add('hidden');
+      } else if (username === 'employee' && password === 'emp123') {
+        currentUser = 'Employee User';
+        currentRole = 'employee';
+        document.getElementById('logged-user').textContent = currentUser;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        updateUIForRole();
+        showView('dashboard');
+        errorEl.classList.add('hidden');
+      } else {
+        errorEl.textContent = 'Invalid username or password. Please try again.';
+        errorEl.classList.remove('hidden');
+      }
+    });
+
+    function updateUIForRole() {
+      if (currentRole === 'employee') {
+        document.querySelectorAll('.admin-only').forEach(el => {
+          el.style.display = 'none';
+        });
+      } else {
+        document.querySelectorAll('.admin-only').forEach(el => {
+          el.style.display = '';
+        });
+      }
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      currentUser = null;
+      currentRole = null;
+      cart = [];
+      document.getElementById('main-app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('login-error').classList.add('hidden');
+    });
+
+    // ============================================
+    // NAVIGATION
+    // ============================================
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        showView(view);
+      });
+    });
+
+    function showView(viewName) {
+      currentView = viewName;
+      
+      document.querySelectorAll('.view-content').forEach(view => {
+        view.classList.add('hidden');
+      });
+      
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const viewEl = document.getElementById(viewName + '-view');
+      if (viewEl) {
+        viewEl.classList.remove('hidden');
+        viewEl.classList.add('animate-fade-in');
+      }
+      
+      const navBtn = document.querySelector(`[data-view="${viewName}"]`);
+      if (navBtn) {
+        navBtn.classList.add('active');
+      }
+      
+      renderAllViews();
+    }
+
+    // ============================================
+    // DATA FILTERING
+    // ============================================
+    function getProducts() {
+      return allData.filter(item => item.type === 'product');
+    }
+
+    function getSales() {
+      return allData.filter(item => item.type === 'sale').sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+    }
+
+    function getTodaySales() {
+      const today = new Date().toISOString().split('T')[0];
+      return getSales().filter(sale => sale.date.startsWith(today));
+    }
+
+    function getLowStockProducts() {
+      return getProducts().filter(p => p.stock <= p.reorderLevel);
+    }
+
+    // ============================================
+    // DASHBOARD RENDERING
+    // ============================================
+    function renderDashboard() {
+      const products = getProducts();
+      const sales = getSales();
+      const todaySales = getTodaySales();
+      const lowStock = getLowStockProducts();
+
+      const todayTotal = todaySales.reduce((sum, sale) => sum + sale.total, 0);
+      
+      document.getElementById('stat-today-sales').textContent = formatCurrency(todayTotal);
+      document.getElementById('stat-total-products').textContent = products.length;
+      document.getElementById('stat-low-stock').textContent = lowStock.length;
+      document.getElementById('stat-total-transactions').textContent = sales.length;
+
+      // Recent Transactions
+      const recentTransEl = document.getElementById('recent-transactions');
+      if (sales.length === 0) {
+        recentTransEl.innerHTML = `
+          <div class="text-center py-12 text-slate-400">
+            <svg class="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="font-medium">No transactions yet</p>
+            <p class="text-sm mt-1">Sales will appear here</p>
+          </div>
+        `;
+      } else {
+        recentTransEl.innerHTML = sales.slice(0, 5).map(sale => {
+          const itemsArray = JSON.parse(sale.items);
+          return `
+            <div class="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-amber-50 rounded-xl hover:shadow-md transition border border-slate-200">
+              <div class="flex-1">
+                <p class="font-bold text-slate-800">${sale.saleId}</p>
+                <p class="text-xs text-slate-600 mt-1">${formatDateTime(sale.date)} • ${itemsArray.length} items</p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-lg text-amber-600">${formatCurrency(sale.total)}</p>
+                <p class="text-xs text-slate-600">${sale.paymentMethod}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Low Stock Items
+      const lowStockEl = document.getElementById('low-stock-items');
+      if (lowStock.length === 0) {
+        lowStockEl.innerHTML = `
+          <div class="text-center py-12 text-slate-400">
+            <svg class="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="font-medium">All items well-stocked</p>
+            <p class="text-sm mt-1">No low stock alerts</p>
+          </div>
+        `;
+      } else {
+        lowStockEl.innerHTML = lowStock.map(product => `
+          <div class="flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl low-stock-badge">
+            <div class="flex-1">
+              <p class="font-bold text-slate-800">${product.name}</p>
+              <p class="text-xs text-slate-600 mt-1">SKU: ${product.sku} • ${product.category}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-lg text-red-600">${product.stock} left</p>
+              <p class="text-xs text-slate-600">Min: ${product.reorderLevel}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // ============================================
+    // POS RENDERING
+    // ============================================
+    function renderPOS() {
+      const products = getProducts();
+      const productsListEl = document.getElementById('products-list');
+      
+      if (products.length === 0) {
+        productsListEl.innerHTML = `
+          <div class="text-center py-16 text-slate-400">
+            <svg class="w-20 h-20 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <p class="text-xl font-bold mb-2">No Products Available</p>
+            <p class="text-sm">Load sample products or add products in Inventory</p>
+          </div>
+        `;
+      } else {
+        productsListEl.innerHTML = products.map(product => {
+          const isLowStock = product.stock <= product.reorderLevel;
+          return `
+            <div class="product-card flex items-center justify-between p-4 bg-slate-50 rounded-xl border-l-4 ${isLowStock ? 'border-red-500' : 'border-amber-500'}" data-product-id="${product.__backendId}">
+              <div class="flex-1">
+                <p class="font-bold text-slate-800 text-lg">${product.name}</p>
+                <p class="text-sm text-slate-600 mt-1">
+                  <span class="category-badge bg-amber-100 text-amber-800">${product.category}</span>
+                  <span class="ml-2 font-mono text-xs">SKU: ${product.sku}</span>
+                </p>
+              </div>
+              <div class="text-right ml-4">
+                <p class="font-bold text-2xl text-amber-600">${formatCurrency(product.price)}</p>
+                <p class="text-sm ${isLowStock ? 'text-red-600 font-bold' : 'text-slate-600'}">
+                  ${isLowStock ? '⚠️ ' : ''}Stock: ${product.stock}
+                </p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.product-card').forEach(item => {
+          item.addEventListener('click', () => {
+            const productId = item.dataset.productId;
+            addToCart(productId);
+          });
+        });
+      }
+
+      renderCart();
+    }
+
+    document.getElementById('product-search').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const products = getProducts();
+      const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(searchTerm) || 
+        p.sku.toLowerCase().includes(searchTerm) ||
+        p.category.toLowerCase().includes(searchTerm)
+      );
+      
+      const productsListEl = document.getElementById('products-list');
+      productsListEl.innerHTML = filtered.map(product => {
+        const isLowStock = product.stock <= product.reorderLevel;
+        return `
+          <div class="product-card flex items-center justify-between p-4 bg-slate-50 rounded-xl border-l-4 ${isLowStock ? 'border-red-500' : 'border-amber-500'}" data-product-id="${product.__backendId}">
+            <div class="flex-1">
+              <p class="font-bold text-slate-800 text-lg">${product.name}</p>
+              <p class="text-sm text-slate-600 mt-1">
+                <span class="category-badge bg-amber-100 text-amber-800">${product.category}</span>
+                <span class="ml-2 font-mono text-xs">SKU: ${product.sku}</span>
+              </p>
+            </div>
+            <div class="text-right ml-4">
+              <p class="font-bold text-2xl text-amber-600">${formatCurrency(product.price)}</p>
+              <p class="text-sm ${isLowStock ? 'text-red-600 font-bold' : 'text-slate-600'}">
+                ${isLowStock ? '⚠️ ' : ''}Stock: ${product.stock}
+              </p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.product-card').forEach(item => {
+        item.addEventListener('click', () => {
+          const productId = item.dataset.productId;
+          addToCart(productId);
+        });
+      });
+    });
+
+    function addToCart(productId) {
+      const product = getProducts().find(p => p.__backendId === productId);
+      if (!product || product.stock <= 0) {
+        showToast('❌ Product out of stock!');
+        return;
+      }
+
+      const existingItem = cart.find(item => item.productId === productId);
+      if (existingItem) {
+        if (existingItem.quantity >= product.stock) {
+          showToast('❌ Cannot add more - insufficient stock!');
+          return;
+        }
+        existingItem.quantity++;
+      } else {
+        cart.push({
+          productId: productId,
+          name: product.name,
+          price: product.price,
+          quantity: 1
+        });
+      }
+
+      renderCart();
+      showToast('✓ Added to cart');
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.productId !== productId);
+      renderCart();
+    }
+
+    function updateCartQuantity(productId, newQuantity) {
+      const item = cart.find(i => i.productId === productId);
+      const product = getProducts().find(p => p.__backendId === productId);
+      
+      if (newQuantity <= 0) {
+        removeFromCart(productId);
+      } else if (newQuantity > product.stock) {
+        showToast('❌ Insufficient stock!');
+      } else {
+        item.quantity = newQuantity;
+        renderCart();
+      }
+    }
+
+    function renderCart() {
+      const cartItemsEl = document.getElementById('cart-items');
+      
+      if (cart.length === 0) {
+        cartItemsEl.innerHTML = `
+          <div class="text-center py-8 text-slate-400">
+            <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <p class="text-sm font-medium">Cart is empty</p>
+          </div>
+        `;
+        document.getElementById('checkout-btn').disabled = true;
+      } else {
+        cartItemsEl.innerHTML = cart.map(item => `
+          <div class="bg-gradient-to-r from-slate-50 to-amber-50 p-3 rounded-xl border border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+              <p class="font-bold text-slate-800 text-sm">${item.name}</p>
+              <button class="text-red-500 hover:text-red-700 p-1" onclick="removeFromCart('${item.productId}')">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <button class="w-8 h-8 bg-white hover:bg-amber-100 border-2 border-amber-300 rounded-lg text-slate-700 font-bold transition" onclick="updateCartQuantity('${item.productId}', ${item.quantity - 1})">-</button>
+                <span class="w-10 text-center font-bold text-lg">${item.quantity}</span>
+                <button class="w-8 h-8 bg-white hover:bg-amber-100 border-2 border-amber-300 rounded-lg text-slate-700 font-bold transition" onclick="updateCartQuantity('${item.productId}', ${item.quantity + 1})">+</button>
+              </div>
+              <p class="font-bold text-lg text-amber-600">${formatCurrency(item.price * item.quantity)}</p>
+            </div>
+          </div>
+        `).join('');
+        document.getElementById('checkout-btn').disabled = false;
+      }
+
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+      
+      document.getElementById('cart-subtotal').textContent = formatCurrency(subtotal);
+      document.getElementById('cart-count').textContent = itemCount;
+      document.getElementById('cart-total').textContent = formatCurrency(subtotal);
+    }
+
+    window.removeFromCart = removeFromCart;
+    window.updateCartQuantity = updateCartQuantity;
+
+    document.getElementById('clear-cart-btn').addEventListener('click', () => {
+      if (cart.length > 0) {
+        cart = [];
+        renderCart();
+        showToast('Cart cleared');
+      }
+    });
+
+    document.getElementById('checkout-btn').addEventListener('click', async () => {
+      if (cart.length === 0) return;
+
+      const btn = document.getElementById('checkout-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-shimmer">Processing Sale...</span>';
+
+      const paymentMethod = document.getElementById('payment-method').value;
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
+      const saleData = {
+        type: 'sale',
+        saleId: generateId('SALE'),
+        date: new Date().toISOString(),
+        items: JSON.stringify(cart),
+        total: total,
+        paymentMethod: paymentMethod,
+        cashier: currentUser
+      };
+
+      const result = await window.dataSdk.create(saleData);
+      
+      if (result.isOk) {
+        for (const item of cart) {
+          const product = getProducts().find(p => p.__backendId === item.productId);
+          if (product) {
+            product.stock -= item.quantity;
+            await window.dataSdk.update(product);
+          }
+        }
+
+        showToast('✓ Sale completed successfully!');
+        cart = [];
+        renderCart();
+        
+        setTimeout(() => {
+          showView('dashboard');
+        }, 1500);
+      } else {
+        showToast('❌ Error processing sale. Please try again.');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<span class="flex items-center justify-center space-x-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Complete Sale</span></span>';
+    });
+
+    // ============================================
+    // INVENTORY RENDERING
+    // ============================================
+    function renderInventory() {
+      const products = getProducts();
+      const inventoryTableEl = document.getElementById('inventory-table-container');
+      
+      let filteredProducts = products;
+      if (currentCategory !== 'all') {
+        filteredProducts = products.filter(p => p.category === currentCategory);
+      }
+      
+      if (filteredProducts.length === 0) {
+        inventoryTableEl.innerHTML = `
+          <div class="p-16 text-center">
+            <svg class="w-20 h-20 mx-auto mb-4 opacity-50 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <p class="text-xl font-bold text-slate-400 mb-2">No products found</p>
+            <p class="text-sm text-slate-500">Try adjusting your filters or add new products</p>
+          </div>
+        `;
+        return;
+      }
+      
+      inventoryTableEl.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-amber-100 to-orange-100 border-b-2 border-amber-200">
+              <tr>
+                <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">SKU</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Product Name</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Category</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Price</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Stock</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              ${filteredProducts.map(product => {
+                const isLowStock = product.stock <= product.reorderLevel;
+                return `
+                  <tr class="hover:bg-amber-50 transition">
+                    <td class="px-6 py-4 text-sm font-mono text-slate-600 font-semibold">${product.sku}</td>
+                    <td class="px-6 py-4">
+                      <p class="text-sm font-bold text-slate-800">${product.name}</p>
+                      ${product.supplier ? `<p class="text-xs text-slate-500 mt-1">${product.supplier}</p>` : ''}
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="category-badge bg-amber-100 text-amber-800">${product.category}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm font-bold text-amber-600">${formatCurrency(product.price)}</td>
+                    <td class="px-6 py-4">
+                      <div class="font-bold text-slate-800">${product.stock} units</div>
+                      <div class="text-xs text-slate-500">Min: ${product.reorderLevel}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                      ${isLowStock ? 
+                        '<span class="category-badge bg-red-100 text-red-700 border-2 border-red-300">⚠️ Low Stock</span>' :
+                        '<span class="category-badge bg-green-100 text-green-700 border-2 border-green-300">✓ In Stock</span>'
+                      }
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                      <div class="flex space-x-2">
+                        <button class="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-lg transition" onclick="editProduct('${product.__backendId}')">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                          </svg>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition" onclick="deleteProduct('${product.__backendId}')">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // Category filter buttons
+    document.querySelectorAll('.category-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCategory = btn.dataset.category;
+        
+        document.querySelectorAll('.category-filter').forEach(b => {
+          b.classList.remove('bg-gradient-to-r', 'from-amber-500', 'to-orange-500', 'text-white', 'shadow-lg');
+          b.classList.add('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700');
+        });
+        
+        btn.classList.remove('bg-slate-100', 'hover:bg-slate-200', 'text-slate-700');
+        btn.classList.add('bg-gradient-to-r', 'from-amber-500', 'to-orange-500', 'text-white', 'shadow-lg');
+        
+        renderInventory();
+      });
+    });
+
+    document.getElementById('add-product-btn').addEventListener('click', () => {
+      document.getElementById('modal-title').textContent = 'Add New Product';
+      document.getElementById('product-form').reset();
+      document.getElementById('edit-product-id').value = '';
+      document.getElementById('product-reorder').value = '10';
+      document.getElementById('product-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-modal-btn').addEventListener('click', () => {
+      document.getElementById('product-modal').classList.add('hidden');
+    });
+
+    document.getElementById('cancel-modal-btn').addEventListener('click', () => {
+      document.getElementById('product-modal').classList.add('hidden');
+    });
+
+    document.getElementById('product-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const productId = document.getElementById('edit-product-id').value;
+      const productData = {
+        type: 'product',
+        name: document.getElementById('product-name').value,
+        sku: document.getElementById('product-sku').value,
+        category: document.getElementById('product-category').value,
+        supplier: document.getElementById('product-supplier').value,
+        price: parseFloat(document.getElementById('product-price').value),
+        stock: parseInt(document.getElementById('product-stock').value),
+        reorderLevel: parseInt(document.getElementById('product-reorder').value)
+      };
+
+      let result;
+      if (productId) {
+        const existingProduct = getProducts().find(p => p.__backendId === productId);
+        const updatedProduct = { ...existingProduct, ...productData };
+        result = await window.dataSdk.update(updatedProduct);
+        showToast('✓ Product updated successfully!');
+      } else {
+        result = await window.dataSdk.create(productData);
+        showToast('✓ Product added successfully!');
+      }
+
+      if (result.isOk) {
+        document.getElementById('product-modal').classList.add('hidden');
+        document.getElementById('product-form').reset();
+      }
+    });
+
+    window.editProduct = (productId) => {
+      const product = getProducts().find(p => p.__backendId === productId);
+      if (!product) return;
+
+      document.getElementById('modal-title').textContent = 'Edit Product';
+      document.getElementById('edit-product-id').value = product.__backendId;
+      document.getElementById('product-name').value = product.name;
+      document.getElementById('product-sku').value = product.sku;
+      document.getElementById('product-category').value = product.category;
+      document.getElementById('product-supplier').value = product.supplier;
+      document.getElementById('product-price').value = product.price;
+      document.getElementById('product-stock').value = product.stock;
+      document.getElementById('product-reorder').value = product.reorderLevel;
+      
+      document.getElementById('product-modal').classList.remove('hidden');
+    };
+
+    window.deleteProduct = async (productId) => {
+      const product = getProducts().find(p => p.__backendId === productId);
+      if (!product) return;
+
+      const confirmDiv = document.createElement('div');
+      confirmDiv.className = 'fixed inset-0 bg-black/60 modal-backdrop flex items-center justify-center z-50';
+      confirmDiv.innerHTML = `
+        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md mx-4 animate-scale-in">
+          <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">Delete Product?</h3>
+            <p class="text-slate-600">Are you sure you want to delete <strong>${product.name}</strong>? This action cannot be undone.</p>
+          </div>
+          <div class="flex space-x-4">
+            <button id="confirm-delete" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-lg">Delete Product</button>
+            <button id="cancel-delete" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(confirmDiv);
+
+      confirmDiv.querySelector('#cancel-delete').addEventListener('click', () => {
+        confirmDiv.remove();
+      });
+
+      confirmDiv.querySelector('#confirm-delete').addEventListener('click', async () => {
+        const result = await window.dataSdk.delete(product);
+        if (result.isOk) {
+          showToast('✓ Product deleted successfully!');
+        }
+        confirmDiv.remove();
+      });
+    };
+
+    // ============================================
+    // SALES HISTORY RENDERING
+    // ============================================
+    function renderSalesHistory() {
+      const sales = getSales();
+      const salesTableEl = document.getElementById('sales-table');
+      
+      if (sales.length === 0) {
+        salesTableEl.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-6 py-16 text-center text-slate-400">
+              <svg class="w-20 h-20 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <p class="text-xl font-bold mb-2">No sales recorded yet</p>
+              <p class="text-sm">Complete your first transaction in the POS</p>
+            </td>
+          </tr>
+        `;
+      } else {
+        salesTableEl.innerHTML = sales.map(sale => {
+          const itemsArray = JSON.parse(sale.items);
+          return `
+            <tr class="hover:bg-amber-50 transition">
+              <td class="px-6 py-4 text-sm font-mono font-bold text-slate-700">${sale.saleId}</td>
+              <td class="px-6 py-4 text-sm text-slate-600">${formatDateTime(sale.date)}</td>
+              <td class="px-6 py-4 text-sm text-slate-600 font-semibold">${itemsArray.length} items</td>
+              <td class="px-6 py-4 text-sm">
+                <span class="category-badge bg-blue-100 text-blue-700">${sale.paymentMethod}</span>
+              </td>
+              <td class="px-6 py-4 text-sm font-bold text-lg text-amber-600">${formatCurrency(sale.total)}</td>
+              <td class="px-6 py-4 text-sm text-slate-600 font-medium">${sale.cashier}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // ============================================
+    // REPORTS RENDERING
+    // ============================================
+    function renderReports() {
+      const products = getProducts();
+      const sales = getSales();
+      
+      // Sales by Category
+      const categoryStats = {};
+      sales.forEach(sale => {
+        const items = JSON.parse(sale.items);
+        items.forEach(item => {
+          const product = products.find(p => p.__backendId === item.productId);
+          if (product) {
+            if (!categoryStats[product.category]) {
+              categoryStats[product.category] = { total: 0, count: 0 };
+            }
+            categoryStats[product.category].total += item.price * item.quantity;
+            categoryStats[product.category].count += item.quantity;
+          }
+        });
+      });
+      
+      const salesByCategoryEl = document.getElementById('sales-by-category');
+      if (Object.keys(categoryStats).length === 0) {
+        salesByCategoryEl.innerHTML = '<p class="text-center text-slate-400 py-8">No sales data yet</p>';
+      } else {
+        salesByCategoryEl.innerHTML = Object.entries(categoryStats)
+          .sort((a, b) => b[1].total - a[1].total)
+          .map(([category, stats]) => `
+            <div class="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-amber-50 rounded-xl border border-slate-200">
+              <div>
+                <p class="font-bold text-slate-800">${category}</p>
+                <p class="text-xs text-slate-600">${stats.count} units sold</p>
+              </div>
+              <p class="font-bold text-lg text-amber-600">${formatCurrency(stats.total)}</p>
+            </div>
+          `).join('');
+      }
+      
+      // Top Products
+      const productStats = {};
+      sales.forEach(sale => {
+        const items = JSON.parse(sale.items);
+        items.forEach(item => {
+          if (!productStats[item.productId]) {
+            productStats[item.productId] = { name: item.name, quantity: 0, revenue: 0 };
+          }
+          productStats[item.productId].quantity += item.quantity;
+          productStats[item.productId].revenue += item.price * item.quantity;
+        });
+      });
+      
+      const topProductsEl = document.getElementById('top-products');
+      if (Object.keys(productStats).length === 0) {
+        topProductsEl.innerHTML = '<p class="text-center text-slate-400 py-8">No sales data yet</p>';
+      } else {
+        topProductsEl.innerHTML = Object.entries(productStats)
+          .sort((a, b) => b[1].quantity - a[1].quantity)
+          .slice(0, 10)
+          .map(([id, stats]) => `
+            <div class="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-amber-50 rounded-xl border border-slate-200">
+              <div>
+                <p class="font-bold text-slate-800">${stats.name}</p>
+                <p class="text-xs text-slate-600">${stats.quantity} units sold</p>
+              </div>
+              <p class="font-bold text-lg text-amber-600">${formatCurrency(stats.revenue)}</p>
+            </div>
+          `).join('');
+      }
+      
+      // Inventory Value
+      const inventoryValueEl = document.getElementById('inventory-value');
+      if (products.length === 0) {
+        inventoryValueEl.innerHTML = '<p class="text-center text-slate-400 py-8">No inventory data yet</p>';
+      } else {
+        const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+        const totalUnits = products.reduce((sum, p) => sum + p.stock, 0);
+        
+        inventoryValueEl.innerHTML = `
+          <div class="grid grid-cols-3 gap-6">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
+              <p class="text-blue-100 text-sm font-semibold mb-2 uppercase tracking-wide">Total Inventory Value</p>
+              <p class="text-4xl font-bold">${formatCurrency(totalValue)}</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
+              <p class="text-green-100 text-sm font-semibold mb-2 uppercase tracking-wide">Total Units</p>
+              <p class="text-4xl font-bold">${totalUnits.toLocaleString()}</p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white">
+              <p class="text-purple-100 text-sm font-semibold mb-2 uppercase tracking-wide">Product Categories</p>
+              <p class="text-4xl font-bold">${[...new Set(products.map(p => p.category))].length}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ============================================
+    // RENDER ALL VIEWS
+    // ============================================
+    function renderAllViews() {
+      if (currentView === 'dashboard') {
+        renderDashboard();
+      } else if (currentView === 'pos') {
+        renderPOS();
+      } else if (currentView === 'inventory') {
+        renderInventory();
+      } else if (currentView === 'sales') {
+        renderSalesHistory();
+      } else if (currentView === 'reports') {
+        renderReports();
+      }
+    }
+
+    // ============================================
+    // INITIALIZE APPLICATION
+    // ============================================
+    initDataSdk();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c131c1af1057a53',t:'MTc2ODk1OTY5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

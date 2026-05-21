@@ -1,3 +1,8 @@
 _security_logout:
     resource: security.route_loader.logout
     type: service
+
+# Required for api_platform firewall json_login (check_path must match a route).
+api_login:
+    path: /api/login
+    methods: [POST]

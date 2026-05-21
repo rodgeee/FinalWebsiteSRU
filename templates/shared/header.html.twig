@@ -1,0 +1,64 @@
+{# Shared header:
+   - before login: Landing/About/Contact/Reviews + Login/Sign Up (top-right)
+   - after login: SHOP BY/RELEASES/BRANDS/FEATURES/SERVICES (top) #}
+<header class="lp-ref-header lp-ref-header--premium" aria-label="Site header">
+  <div class="lp-ref-header__row">
+    <div class="lp-ref-header__start">
+      <a href="{{ path('app_landingpage_legacy') }}" class="lp-ref-header__brand" aria-label="Shoes R' Us home">
+        <img class="lp-ref-header__logo" src="{{ asset('img/shoes-r-us-logo.png') }}" alt="" width="90" height="30"/>
+      </a>
+
+      {% if is_granted('ROLE_CUSTOMER') %}
+        <nav class="lp-ref-header__nav" aria-label="Primary">
+          <a href="{{ path('app_landingpage_legacy') }}#shop-by-brand">SHOP BY</a>
+          <a href="{{ path('public_releases') }}" data-turbo="false">RELEASES</a>
+          <a href="{{ path('public_brands') }}" data-turbo="false">BRANDS</a>
+          <a href="{{ path('app_landingpage_legacy') }}#featured-products">FEATURES</a>
+          <a href="{{ path('public_services') }}" data-turbo="false" data-turbo-frame="_top">SERVICES</a>
+        </nav>
+      {% else %}
+        <nav class="lp-ref-header__nav" aria-label="Primary">
+          <a href="{{ path('app_landingpage_legacy') }}">HOME</a>
+          <a href="{{ path('public_about') }}">ABOUT US</a>
+          <a href="{{ path('public_contact') }}">CONTACT US</a>
+          <a href="{{ path('public_services') }}" data-turbo="false" data-turbo-frame="_top">SERVICES</a>
+          <a href="{{ path('public_reviews') }}">CUSTOMER REVIEWS</a>
+        </nav>
+      {% endif %}
+    </div>
+
+    <div class="lp-ref-header__end">
+      {% if is_granted('ROLE_CUSTOMER') %}
+        <button type="button" class="lp-ref-header__search" aria-label="Search">SEARCH</button>
+        <div class="lp-ref-header__icons">
+          <a href="{{ path('app_landingpage_legacy') }}#site-footer" class="lp-ref-header__icon" aria-label="Support">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 0 1 18 0v1a2 2 0 0 1-2 2h-1.5a1 1 0 0 1-1-1v-2.5a1 1 0 0 1 1-1H20"/><path d="M5 14v3a2 2 0 0 0 2 2h1"/><path d="M12 18v3"/><path d="M8 21h8"/></svg>
+          </a>
+          <a href="{{ path('customer_account') }}" class="lp-ref-header__icon" aria-label="Account">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </a>
+          <span class="lp-ref-header__icon lp-ref-header__icon--muted" aria-label="Wishlist" role="img">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </span>
+          {% set bagCount = cart_item_count() %}
+          <a href="{{ path('customer_cart_index') }}" class="lp-ref-header__icon lp-ref-header__icon--bag" aria-label="Shopping bag{% if bagCount > 0 %}, {{ bagCount }} items{% endif %}" data-turbo-frame="_top">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h15l-1.5 9h-12z"/><path d="M6 7 5 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+            {% if bagCount > 0 %}
+              <span class="lp-ref-header__bag-count">{{ bagCount > 99 ? '99+' : bagCount }}</span>
+            {% endif %}
+          </a>
+          <form class="lp-ref-header__logout" method="post" action="{{ path('customer_logout') }}" data-turbo="false">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('customer_logout') }}">
+            <button type="submit" class="lp-ref-header__logout-btn" aria-label="Log out">LOG OUT</button>
+          </form>
+        </div>
+      {% else %}
+        <div class="lp-ref-header__auth">
+          <a class="lp-ref-header__auth-link" href="{{ path('customer_login') }}">LOG IN</a>
+          <a class="lp-ref-header__auth-btn" href="{{ path('customer_signup') }}">SIGN UP</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</header>
+

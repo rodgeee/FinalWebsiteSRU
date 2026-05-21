@@ -1,0 +1,111 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Stocks • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[1200px] p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Stock Management</h1>
+      <div class="flex items-center gap-2">
+        <a href="{{ path('app_dashboard') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all" title="Return to dashboard" aria-label="Return to dashboard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline><path d="M20 12H10"></path></svg>
+          <span class="sr-only">Dashboard</span>
+        </a>
+        <a href="{{ path('admin_stocks_new') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg">
+          <i data-lucide="plus" class="h-5 w-5"></i>
+          New Stock Entry
+        </a>
+      </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+      <div class="rounded-xl bg-green-50 border border-green-200 p-3 text-green-800 mb-3">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+      <div class="rounded-xl bg-red-50 border border-red-200 p-3 text-red-800 mb-3">{{ message }}</div>
+    {% endfor %}
+
+    <div class="rounded-xl border border-border bg-white shadow-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-xs uppercase tracking-wider text-textMuted">
+              <th class="border-b border-border px-4 py-3">ID</th>
+              <th class="border-b border-border px-4 py-3">Product</th>
+              <th class="border-b border-border px-4 py-3">Color</th>
+              <th class="border-b border-border px-4 py-3">Size</th>
+              <th class="border-b border-border px-4 py-3">Price</th>
+              <th class="border-b border-border px-4 py-3">Stock Quantity</th>
+              <th class="border-b border-border px-4 py-3">Created</th>
+              <th class="border-b border-border px-4 py-3">Updated</th>
+              <th class="border-b border-border px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for stock in stocks %}
+              <tr>
+                <td class="border-b border-border px-4 py-3">{{ stock.id }}</td>
+                <td class="border-b border-border px-4 py-3">
+                  {% if stock.product %}
+                    <div class="font-medium">{{ stock.product.name }}</div>
+                    {% set primaryImage = stock.product.primaryImage %}
+                    {% if primaryImage %}
+                      <div class="mt-1">
+                        {% if primaryImage starts with 'http' %}
+                          <img src="{{ primaryImage }}" alt="{{ stock.product.name }}" class="h-10 w-10 rounded-md object-cover border border-border" />
+                        {% else %}
+                          <img src="{{ asset(primaryImage) }}" alt="{{ stock.product.name }}" class="h-10 w-10 rounded-md object-cover border border-border" />
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-textMuted">—</span>
+                  {% endif %}
+                </td>
+                <td class="border-b border-border px-4 py-3">{{ stock.product ? stock.product.color : '—' }}</td>
+                <td class="border-b border-border px-4 py-3">{{ stock.product ? stock.product.size : '—' }}</td>
+                <td class="border-b border-border px-4 py-3">{{ stock.product and stock.product.price ? ('₱' ~ stock.product.price) : '—' }}</td>
+                <td class="border-b border-border px-4 py-3">
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold {{ stock.quantity > 10 ? 'bg-green-100 text-green-800' : (stock.quantity > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                    {{ stock.quantity }}
+                  </span>
+                </td>
+                <td class="border-b border-border px-4 py-3">{{ stock.createdAt ? stock.createdAt|date('Y-m-d H:i') : '—' }}</td>
+                <td class="border-b border-border px-4 py-3">{{ stock.updatedAt ? stock.updatedAt|date('Y-m-d H:i') : '—' }}</td>
+                <td class="border-b border-border px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <a class="text-brand hover:underline" href="{{ path('admin_stocks_show', {id: stock.id}) }}" aria-label="View" title="View">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </a>
+                    <a class="text-yellow-600 hover:underline" href="{{ path('admin_stocks_edit', {id: stock.id}) }}" aria-label="Edit" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    </a>
+                    {% set canDelete = is_granted('ROLE_ADMIN') or (stock.owner is not null and app.user and stock.owner.id == app.user.id) %}
+                    {% if canDelete %}
+                      <form method="post" action="{{ path('admin_stocks_delete', {id: stock.id}) }}" onsubmit="return confirm('Delete this stock entry? This will also delete the associated product.');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stock.id) }}">
+                        <button class="text-red-600 hover:underline" type="submit" aria-label="Delete" title="Delete">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+                        </button>
+                      </form>
+                    {% else %}
+                      <button class="text-red-300 cursor-not-allowed opacity-60" type="button" aria-label="Delete" title="Delete (admin or owner only)" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+                      </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="9" class="px-4 py-6 text-center text-textMuted">No stock entries found. <a href="{{ path('admin_stocks_new') }}" class="text-brand hover:underline">Create your first stock entry</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

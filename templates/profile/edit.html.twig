@@ -1,0 +1,138 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Edit Profile • Admin{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .form-error-message {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+    .form-error-message li {
+      margin: 2px 0;
+    }
+  </style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[1000px] p-4 sm:p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[3px] text-textMuted">Account Management</p>
+      <h1 class="text-2xl font-semibold">Edit Profile</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{{ path('app_profile') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:bg-[#E8F2FF] hover:text-brand hover:border-brand transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline><path d="M20 12H10"></path></svg>
+        Back
+      </a>
+    </div>
+  </div>
+
+  {% for message in app.flashes('success') %}
+    <div class="rounded-xl bg-green-50 border border-green-200 p-4 text-green-800">{{ message }}</div>
+  {% endfor %}
+
+  {% for message in app.flashes('error') %}
+    <div class="rounded-xl bg-red-50 border border-red-200 p-4 text-red-800">{{ message }}</div>
+  {% endfor %}
+
+  {{ form_start(form) }}
+
+  <!-- Edit Form Card -->
+  <div class="rounded-xl border border-border bg-white shadow-card p-6">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-lg bg-[#E8F2FF] flex items-center justify-center">
+        <i data-lucide="edit-3" class="h-5 w-5 text-brand"></i>
+      </div>
+      <h2 class="text-lg font-semibold text-text">Profile Information</h2>
+    </div>
+      <div class="space-y-6">
+        {% set fullField = form.Fullname is defined ? form.Fullname : (form.fullName is defined ? form.fullName : null) %}
+        {% set emailField = form.Email is defined ? form.Email : (form.email is defined ? form.email : null) %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            {{ fullField ? form_label(fullField) : '' }}
+            {{ fullField ? form_widget(fullField) : '' }}
+            {{ fullField ? form_errors(fullField) : '' }}
+          </div>
+
+          <div>
+            {{ emailField ? form_label(emailField) : '' }}
+            {{ emailField ? form_widget(emailField) : '' }}
+            {{ emailField ? form_errors(emailField) : '' }}
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-border">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-[#E8F2FF] flex items-center justify-center">
+              <i data-lucide="key" class="h-4 w-4 text-brand"></i>
+            </div>
+            <h3 class="text-base font-semibold text-text">Change Password</h3>
+            <span class="text-xs text-textMuted bg-card px-2 py-1 rounded">Optional</span>
+          </div>
+          <p class="text-sm text-textMuted mb-4">Leave blank to keep your current password</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% set pw1Id = form.plainPassword.first.vars.id %}
+            <div class="space-y-1.5">
+              {{ form_label(form.plainPassword.first) }}
+              <div class="relative">
+                {{ form_widget(form.plainPassword.first, {'attr': {'class': (form.plainPassword.first.vars.attr.class|default('') ~ ' pr-10')}}) }}
+                <button type="button" class="absolute inset-y-0 right-2 my-auto inline-flex items-center justify-center text-gray-500 hover:text-brand" data-toggle-password="{{ pw1Id }}" aria-label="Show password">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+              {{ form_errors(form.plainPassword.first) }}
+            </div>
+
+            {% set pw2Id = form.plainPassword.second.vars.id %}
+            <div class="space-y-1.5">
+              {{ form_label(form.plainPassword.second) }}
+              <div class="relative">
+                {{ form_widget(form.plainPassword.second, {'attr': {'class': (form.plainPassword.second.vars.attr.class|default('') ~ ' pr-10')}}) }}
+                <button type="button" class="absolute inset-y-0 right-2 my-auto inline-flex items-center justify-center text-gray-500 hover:text-brand" data-toggle-password="{{ pw2Id }}" aria-label="Show password">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+              {{ form_errors(form.plainPassword.second) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-border flex items-center justify-between">
+        <a href="{{ path('app_profile') }}" class="text-textMuted hover:text-text transition-colors">Cancel</a>
+        <button class="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg hover:bg-[#0055CC]" type="submit">
+          <i data-lucide="save" class="h-4 w-4"></i>
+          Save Changes
+        </button>
+      </div>
+    {{ form_end(form) }}
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggles = document.querySelectorAll('[data-toggle-password]');
+      toggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-toggle-password');
+          const input = document.getElementById(targetId);
+          if (!input) return;
+          const isHidden = input.getAttribute('type') === 'password';
+          input.setAttribute('type', isHidden ? 'text' : 'password');
+          btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+          btn.innerHTML = isHidden
+            ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+            : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 18 18"/><path d="M10.58 10.58a2 2 0 1 0 2.83 2.83"/><path d="M16.68 16.68A9.86 9.86 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94"/><path d="M14.12 5.1A9.77 9.77 0 0 1 12 4c-7 0-11 8-11 8a18.43 18.43 0 0 0 5.63 6.19"/></svg>';
+        });
+      });
+    });
+  </script>
+{% endblock %}
+

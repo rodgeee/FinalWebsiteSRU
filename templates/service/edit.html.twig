@@ -1,0 +1,54 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Edit Service • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[780px] space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[3px] text-textMuted">Service queue</p>
+      <h1 class="text-2xl font-semibold text-text">Update {{ service.shoeName ?: 'service ticket' }}</h1>
+      <p class="text-sm text-textMuted">Adjust the current stage or notes, then save to push the job forward.</p>
+    </div>
+    <a href="{{ path('admin_service_index') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-text hover:text-brand hover:border-brand transition-all">
+      <i data-lucide="arrow-left" class="h-4 w-4"></i>
+      Back to queue
+    </a>
+  </div>
+
+  <article class="rounded-2xl border border-border bg-white p-6 shadow-card space-y-5">
+    {{ form_start(form, { attr: { class: 'space-y-5' } }) }}
+      <div>
+        {{ form_label(form.ShoeName) }}
+        {{ form_widget(form.ShoeName) }}
+        {{ form_errors(form.ShoeName) }}
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          {{ form_label(form.ServiceType) }}
+          {{ form_widget(form.ServiceType) }}
+          {{ form_errors(form.ServiceType) }}
+        </div>
+        <div>
+          {{ form_label(form.Status) }}
+          {{ form_widget(form.Status) }}
+          {{ form_errors(form.Status) }}
+        </div>
+      </div>
+      <div>
+        {{ form_label(form.Note) }}
+        {{ form_widget(form.Note) }}
+        {{ form_errors(form.Note) }}
+      </div>
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-xs text-textMuted">Last updated {{ service.updatedAt ? service.updatedAt|date('M j, Y g:i A') : 'never' }}</p>
+        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:shadow-lg">
+          <i data-lucide="save" class="mr-2 h-4 w-4"></i>
+          Save changes
+        </button>
+      </div>
+    {{ form_end(form) }}
+  </article>
+</div>
+{% endblock %}
+

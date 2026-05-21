@@ -1,0 +1,72 @@
+{% extends 'dashboard/index.html.twig' %}
+
+{% block title %}Edit Staff • Admin{% endblock %}
+
+{% block dashboard_content %}
+<div class="mx-auto max-w-[780px] space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[3px] text-textMuted">Staff</p>
+      <h1 class="text-2xl font-semibold">Edit staff account</h1>
+      <p class="text-sm text-textMuted">{{ staff.fullName }} • {{ staff.email }}</p>
+    </div>
+    <a href="{{ path('admin_staff_index') }}" class="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand hover:border-brand transition-all">
+      <i data-lucide="arrow-left" class="h-5 w-5"></i>
+      Back to list
+    </a>
+  </div>
+
+  {% for message in app.flashes('success') %}
+    <div class="rounded-xl bg-green-50 border border-green-200 p-3 text-green-800">{{ message }}</div>
+  {% endfor %}
+
+  <div class="rounded-xl border border-border bg-white shadow-card p-5 space-y-4">
+    {{ form_start(form) }}
+      <div class="grid gap-4">
+        <div>
+          {{ form_label(form.fullName) }}
+          {{ form_widget(form.fullName, { attr: { class: 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand' } }) }}
+          {{ form_errors(form.fullName) }}
+        </div>
+        <div>
+          {{ form_label(form.email) }}
+          {{ form_widget(form.email, { attr: { class: 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand' } }) }}
+          {{ form_errors(form.email) }}
+        </div>
+        <div>
+          {{ form_label(form.roleChoice) }}
+          {{ form_widget(form.roleChoice, { attr: { class: 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand' } }) }}
+          <p class="text-[11px] text-textMuted mt-1">Admin inherits all staff permissions.</p>
+          {{ form_errors(form.roleChoice) }}
+        </div>
+        <div>
+          {{ form_label(form.statusChoice) }}
+          {{ form_widget(form.statusChoice, { attr: { class: 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand' } }) }}
+          <p class="text-[11px] text-textMuted mt-1">Choose account state: active, disabled, or archived.</p>
+          {{ form_errors(form.statusChoice) }}
+        </div>
+        <div>
+          {{ form_label(form.plainPassword.first) }}
+          {{ form_widget(form.plainPassword.first, { attr: { class: 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand' } }) }}
+          {{ form_errors(form.plainPassword.first) }}
+        </div>
+        <div>
+          {{ form_label(form.plainPassword.second) }}
+          {{ form_widget(form.plainPassword.second, { attr: { class: 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand' } }) }}
+          {{ form_errors(form.plainPassword.second) }}
+          <p class="text-[11px] text-textMuted mt-1">Leave blank to keep current password.</p>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-card hover:shadow-lg transition">
+          <i data-lucide="save" class="h-5 w-5"></i>
+          Save changes
+        </button>
+        <a href="{{ path('admin_staff_index') }}" class="text-sm text-textMuted hover:text-brand">Cancel</a>
+      </div>
+    {{ form_end(form) }}
+  </div>
+</div>
+{% endblock %}
+
+

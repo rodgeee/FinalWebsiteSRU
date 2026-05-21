@@ -1,0 +1,177 @@
+{% extends 'public/_layout.html.twig' %}
+
+{% block title %}Brands • Shoes R' Us{% endblock %}
+
+{% block body_class %}lp-home lp-brands-page{% endblock %}
+
+{% block public_page_stylesheets %}
+    <meta name="turbo-cache-control" content="no-cache">
+    <style>
+        body.lp-brands-page .lp-brands .lp-brands-list__label {
+            font-weight: 500;
+        }
+        body.lp-brands-page .lp-brands .lp-brands-list__item:hover .lp-brands-list__label,
+        body.lp-brands-page .lp-brands .lp-brands-list__link:hover .lp-brands-list__label {
+            color: #0044cc;
+        }
+    </style>
+{% endblock %}
+
+{% block public_page_body %}
+    <div
+        class="lp-brands"
+        data-lp-brands
+        data-lp-brands-default-src="{{ asset('img/' ~ defaultBrandImage) }}"
+        data-lp-brands-default-alt="{{ brandRows[0].name ?? '' }}"
+    >
+        <div class="lp-brands__panel lp-brands__panel--list">
+            <nav class="lp-brands-alpha" aria-label="Jump to brands by letter">
+                <div class="lp-brands-alpha__inner">
+                    {% for letter in alphabet %}
+                        {% if letter in availableLetters %}
+                            <a href="#alpha-{{ letter }}" class="lp-brands-alpha__char is-available">{{ letter }}</a>
+                        {% else %}
+                            <span class="lp-brands-alpha__char is-muted">{{ letter }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </nav>
+
+            <ul class="lp-brands-list" role="list" data-lp-brands-list>
+                {% for row in brandRows %}
+                    <li
+                        class="lp-brands-list__item"
+                        data-brand-image="{{ asset('img/' ~ row.image) }}"
+                        data-brand-name="{{ row.name }}"
+                        {% if row.anchorId %} id="{{ row.anchorId }}"{% endif %}
+                    >
+                        <a class="lp-brands-list__link" href="{{ path('app_landingpage_legacy') }}#shop-by-brand">
+                            <span class="lp-brands-list__label">{{ row.name }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="lp-brands__panel lp-brands__panel--visual" aria-live="polite">
+            <div class="lp-brands-visual">
+                <img
+                    class="lp-brands-visual__img"
+                    src="{{ asset('img/' ~ defaultBrandImage) }}"
+                    alt="{{ brandRows[0].name ?? 'Featured brand' }}"
+                    width="1200"
+                    height="1600"
+                    loading="eager"
+                    decoding="async"
+                    data-lp-brands-img
+                >
+            </div>
+            <a class="lp-brands-fab" href="{{ path('app_landingpage_legacy') }}#featured-products" title="Shop sale" aria-label="Shop sale">
+                <span class="lp-brands-fab__icon" aria-hidden="true">%</span>
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            const FADE_MS = 200;
+
+            function initLpBrandsHover() {
+                const root = document.querySelector('[data-lp-brands]');
+                if (!root || root.dataset.lpBrandsHoverInit === '1') {
+                    return;
+                }
+
+                const img = root.querySelector('[data-lp-brands-img]');
+                const list = root.querySelector('[data-lp-brands-list]');
+                const items = root.querySelectorAll('.lp-brands-list__item[data-brand-image]');
+
+                if (!img || items.length === 0) {
+                    return;
+                }
+
+                root.dataset.lpBrandsHoverInit = '1';
+
+                const defaultSrc = root.dataset.lpBrandsDefaultSrc || img.getAttribute('src') || '';
+                const defaultAlt = root.dataset.lpBrandsDefaultAlt || img.getAttribute('alt') || '';
+                let fadeTimer = null;
+
+                img.dataset.currentSrc = img.getAttribute('src') || '';
+
+                function setBrandFrame(brandName) {
+                    img.classList.toggle('is-brand-asics', brandName === 'ASICS');
+                    img.classList.toggle('is-brand-adidas', brandName === 'ADIDAS');
+                }
+
+                function swapImage(src, alt, brandName) {
+                    if (!src || img.dataset.currentSrc === src) {
+                        setBrandFrame(brandName);
+                        return;
+                    }
+
+                    window.clearTimeout(fadeTimer);
+                    img.classList.add('is-fading');
+                    setBrandFrame(brandName);
+
+                    fadeTimer = window.setTimeout(function () {
+                        img.src = src;
+                        img.alt = alt;
+                        img.dataset.currentSrc = src;
+
+                        function onLoad() {
+                            img.classList.remove('is-fading');
+                        }
+                        img.addEventListener('load', onLoad, { once: true });
+                        if (img.complete) {
+                            onLoad();
+                        }
+                    }, FADE_MS);
+                }
+
+                function showBrand(item) {
+                    swapImage(
+                        item.getAttribute('data-brand-image'),
+                        item.getAttribute('data-brand-name') || '',
+                        item.getAttribute('data-brand-name') || ''
+                    );
+                }
+
+                function resetBrand() {
+                    img.classList.remove('is-brand-asics', 'is-brand-adidas');
+                    swapImage(defaultSrc, defaultAlt, '');
+                }
+
+                items.forEach(function (item) {
+                    item.addEventListener('mouseenter', function () {
+                        showBrand(item);
+                    });
+                    item.addEventListener('focusin', function () {
+                        showBrand(item);
+                    });
+                });
+
+                if (list) {
+                    list.addEventListener('mouseleave', resetBrand);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', initLpBrandsHover);
+            document.addEventListener('turbo:load', initLpBrandsHover);
+            document.addEventListener('turbo:render', initLpBrandsHover);
+
+            document.addEventListener('turbo:before-cache', function () {
+                const root = document.querySelector('[data-lp-brands]');
+                if (root) {
+                    delete root.dataset.lpBrandsHoverInit;
+                }
+            });
+
+            if (document.readyState !== 'loading') {
+                initLpBrandsHover();
+            }
+        })();
+    </script>
+{% endblock %}
