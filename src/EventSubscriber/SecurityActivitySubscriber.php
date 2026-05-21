@@ -32,13 +32,7 @@ final class SecurityActivitySubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->activityLogger->log(
-            'login',
-            'auth',
-            null,
-            'User logged in.',
-            $this->describeUser($user)
-        );
+        $this->safeLog('login', $this->describeUser($user));
     }
 
     public function onLogout(LogoutEvent $event): void
@@ -49,13 +43,22 @@ final class SecurityActivitySubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->activityLogger->log(
-            'logout',
-            'auth',
-            null,
-            'User logged out.',
-            $this->describeUser($user)
-        );
+        $this->safeLog('logout', $this->describeUser($user));
+    }
+
+    private function safeLog(string $action, string $target): void
+    {
+        try {
+            $this->activityLogger->log(
+                $action,
+                'auth',
+                null,
+                $action === 'login' ? 'User logged in.' : 'User logged out.',
+                $target
+            );
+        } catch (\Throwable) {
+            // Never block login/logout if activity_log is missing or misconfigured on the server.
+        }
     }
 
     private function describeUser(UserInterface|string $user): string

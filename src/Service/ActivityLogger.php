@@ -65,7 +65,6 @@ class ActivityLogger
             $log->setActor($user);
             $log->setActorName($user->getFullname());
             $log->setActorEmail($user->getEmail());
-            $log->setActorId((string) $user->getId());
             $log->setActorRole('ROLE_ADMIN');
             return;
         }
@@ -73,7 +72,6 @@ class ActivityLogger
         if ($user instanceof Staff) {
             $log->setActorName($user->getFullName());
             $log->setActorEmail($user->getEmail());
-            $log->setActorId((string) $user->getId());
             $log->setActorRole('ROLE_STAFF');
             return;
         }

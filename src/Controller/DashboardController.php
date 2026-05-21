@@ -57,9 +57,15 @@ final class DashboardController extends AbstractController
             'stocks' => $stocksRepository->count([]),
         ];
 
-        $recentActivity = $activityLogRepository->findLatest(null, null, null, 5);
-        $stockActivity = $activityLogRepository->findLatest(null, 'stock', null, 6);
-        $serviceActivity = $activityLogRepository->findLatest(null, 'service', null, 6);
+        try {
+            $recentActivity = $activityLogRepository->findLatest(null, null, null, 5);
+            $stockActivity = $activityLogRepository->findLatest(null, 'stock', null, 6);
+            $serviceActivity = $activityLogRepository->findLatest(null, 'service', null, 6);
+        } catch (\Throwable) {
+            $recentActivity = [];
+            $stockActivity = [];
+            $serviceActivity = [];
+        }
         $notifications = [...$stockActivity, ...$serviceActivity];
         \usort($notifications, static fn($a, $b) => $b->getCreatedAt() <=> $a->getCreatedAt());
         $readIds = $request->getSession()->get('notif_read', []);

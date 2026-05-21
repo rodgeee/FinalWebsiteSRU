@@ -49,6 +49,9 @@ if [ -n "${DATABASE_URL}" ]; then
     echo "Running database migrations..."
     if ! run_console doctrine:migrations:migrate --no-interaction --allow-no-migration; then
         echo "WARNING: migrations failed — check DATABASE_URL and MySQL connectivity." >&2
+    else
+        echo "Verifying staff accounts can log in..."
+        run_console app:verify-staff-for-login --no-interaction || true
     fi
 
     if [ "${SEED_DEMO_PRODUCTS:-0}" = "1" ]; then
