@@ -5,6 +5,9 @@ PORT="${PORT:-80}"
 sed -i "s/__PORT__/${PORT}/g" /etc/nginx/conf.d/symfony.conf
 echo "Nginx will listen on port ${PORT}"
 
+echo "Clearing Symfony cache..."
+php bin/console cache:clear --env="${APP_ENV:-prod}" --no-debug
+
 echo "Warming up Symfony cache..."
 php bin/console cache:warmup --env="${APP_ENV:-prod}" --no-debug
 
