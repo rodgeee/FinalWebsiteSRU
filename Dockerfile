@@ -65,8 +65,9 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=builder /app /app
 
-# Runtime must use platform env (Railway), not the build-time .env file
-RUN rm -f /app/.env /app/.env.local /app/.env.local.php
+# Symfony requires .env to exist; Railway/OS variables override these defaults at runtime
+COPY .env.docker-build /app/.env
+RUN rm -f /app/.env.local /app/.env.local.php
 
 # Explicit var subdirs + ownership so PHP-FPM (www-data) can write cache/logs
 RUN mkdir -p /app/var/cache /app/var/log /app/var/cache/prod \

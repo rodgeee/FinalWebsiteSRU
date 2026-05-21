@@ -5,9 +5,10 @@ PORT="${PORT:-80}"
 sed -i "s/__PORT__/${PORT}/g" /etc/nginx/conf.d/symfony.conf
 echo "Nginx will listen on port ${PORT}"
 
-rm -f /app/.env /app/.env.local /app/.env.local.php
+# Keep /app/.env (required by Symfony); remove local overrides only
+rm -f /app/.env.local /app/.env.local.php
 
-# Defaults for Symfony (Railway Variables override these when set)
+# Railway/OS variables override .env defaults (Symfony does not replace existing env vars)
 export APP_ENV="${APP_ENV:-prod}"
 export APP_DEBUG="${APP_DEBUG:-0}"
 if [ -z "${APP_SECRET}" ]; then
