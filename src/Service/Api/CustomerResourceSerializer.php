@@ -8,12 +8,14 @@ use App\Entity\Orders;
 use App\Entity\Products;
 use App\Entity\Services;
 use App\Service\Product\ProductGalleryBuilder;
+use App\Service\Product\ProductImageUrlResolver;
 use App\Service\ServiceWorkflow;
 
 final class CustomerResourceSerializer
 {
     public function __construct(
         private readonly ProductGalleryBuilder $productGalleryBuilder,
+        private readonly ProductImageUrlResolver $productImageUrlResolver,
     ) {
     }
     /**
@@ -37,6 +39,9 @@ final class CustomerResourceSerializer
      */
     public function product(Products $product, int $availableStock): array
     {
+        $galleryPaths = $this->productGalleryBuilder->buildGalleryPaths($product);
+        $primary = $product->getPrimaryImage();
+
         return [
             'id' => $product->getId(),
             'name' => $product->getName(),
@@ -44,9 +49,12 @@ final class CustomerResourceSerializer
             'size' => $product->getSize(),
             'price' => $product->getPrice(),
             'description' => $product->getDescription(),
-            'image' => $product->getPrimaryImage(),
+            'image' => $primary,
+            'imageUrl' => $this->productImageUrlResolver->resolve($primary),
             'images' => $product->getImages(),
-            'gallery' => $this->productGalleryBuilder->buildGalleryPaths($product),
+            'imageUrls' => $this->productImageUrlResolver->resolveMany($product->getImages()),
+            'gallery' => $galleryPaths,
+            'galleryUrls' => $this->productImageUrlResolver->resolveMany($galleryPaths),
             'availableStock' => $availableStock,
         ];
     }
@@ -75,13 +83,15 @@ final class CustomerResourceSerializer
     {
         $products = [];
         foreach ($order->getProducts() as $product) {
+            $primary = $product->getPrimaryImage();
             $products[] = [
                 'id' => $product->getId(),
                 'name' => $product->getName(),
                 'color' => $product->getColor(),
                 'size' => $product->getSize(),
                 'price' => $product->getPrice(),
-                'image' => $product->getImage(),
+                'image' => $primary,
+                'imageUrl' => $this->productImageUrlResolver->resolve($primary),
             ];
         }
 

@@ -1,2 +1,8 @@
+# Ignore non-image files; product photos are tracked for Railway deploy.
 *
 !.gitignore
+!*.png
+!*.jpg
+!*.jpeg
+!*.webp
+!*.gif

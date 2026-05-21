@@ -54,5 +54,9 @@ services:
         arguments:
             $appDeepLinkScheme: '%env(default:app_deep_link_scheme:APP_DEEP_LINK_SCHEME)%'
 
+    App\Service\Product\ProductImageUrlResolver:
+        arguments:
+            $defaultUri: '%env(default:app_default_uri:DEFAULT_URI)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
