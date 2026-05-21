@@ -7,9 +7,18 @@ ngrok_root_redirect:
         permanent: false
     condition: "request.headers.get('x-forwarded-host') matches '/ngrok/i' or request.headers.get('x-original-host') matches '/ngrok/i' or request.headers.get('host') matches '/ngrok/i' or request.getHost() matches '/ngrok/i' or request.headers.get('forwarded') matches '/ngrok/i'"
 
-# Production / Railway: open admin login at / (set APP_ROOT_TO_ADMIN=1 or use *.up.railway.app)
+# When APP_ROOT_TO_ADMIN=1 or host is *.up.railway.app → admin login (not the storefront).
 admin_root_redirect:
     path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: adminls_login
+        permanent: false
+    condition: "env('APP_ROOT_TO_ADMIN') == '1' or request.getHost() matches '/\\.up\\.railway\\.app$/'"
+
+# /landingpage is the public shop URL; on Railway/admin mode send visitors to admin login instead.
+admin_landingpage_redirect:
+    path: /landingpage
     controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
     defaults:
         route: adminls_login
