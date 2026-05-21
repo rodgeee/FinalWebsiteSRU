@@ -23,7 +23,8 @@ security:
                 property: email
         chain_user_provider:
             chain:
-                providers: [staff_user_provider, admin_user_provider]
+                # Admin emails must resolve to Adminuser first (avoids staff row stealing login).
+                providers: [admin_user_provider, staff_user_provider]
         api_user_provider:
             chain:
                 providers: [customer_user_provider, staff_user_provider, admin_user_provider]

@@ -126,6 +126,20 @@ if [ -n "${DATABASE_URL}" ]; then
             echo "Verifying staff accounts can log in..."
             run_console app:verify-staff-for-login --no-interaction || true
         fi
+
+        bootstrap_email="${BOOTSTRAP_ADMIN_EMAIL:-}"
+        bootstrap_password="${BOOTSTRAP_ADMIN_PASSWORD:-}"
+        if [ "${ENSURE_DEFAULT_ADMIN:-0}" = "1" ]; then
+            bootstrap_email="${bootstrap_email:-admin@shoesrus.local}"
+        fi
+        if [ -n "${bootstrap_email}" ] && [ -n "${bootstrap_password}" ]; then
+            echo "Ensuring admin login account (${bootstrap_email})..."
+            run_console app:create-admin \
+                --email="${bootstrap_email}" \
+                --password="${bootstrap_password}" \
+                --full-name="System Admin" \
+                --no-interaction || true
+        fi
     else
         echo "WARNING: DATABASE_URL present but DB unreachable — skipping migrations." >&2
     fi

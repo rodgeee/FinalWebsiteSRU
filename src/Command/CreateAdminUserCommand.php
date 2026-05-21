@@ -34,7 +34,8 @@ final class CreateAdminUserCommand extends Command
         $this
             ->addOption('email', null, InputOption::VALUE_REQUIRED, 'Admin login email')
             ->addOption('password', null, InputOption::VALUE_REQUIRED, 'Plain password (min 8 chars, upper, lower, number, symbol)')
-            ->addOption('full-name', null, InputOption::VALUE_REQUIRED, 'Display name', 'System Admin');
+            ->addOption('full-name', null, InputOption::VALUE_REQUIRED, 'Display name', 'System Admin')
+            ->addOption('if-missing', null, InputOption::VALUE_NONE, 'Only create when this email does not exist yet (do not reset password)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -58,6 +59,12 @@ final class CreateAdminUserCommand extends Command
         }
 
         $existing = $this->adminuserRepository->findOneBy(['Email' => $email]);
+        if ($existing !== null && $input->getOption('if-missing')) {
+            $io->note(sprintf('Admin "%s" already exists — password unchanged.', $email));
+
+            return Command::SUCCESS;
+        }
+
         $admin = $existing ?? new Adminuser();
         $isNew = $existing === null;
 
