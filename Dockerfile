@@ -65,7 +65,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=builder /app /app
 
-# Symfony requires .env to exist; Railway/OS variables override these defaults at runtime
+# Symfony requires .env to exist; entrypoint rebuilds .env from .env.dist at runtime
+COPY .env.docker-build /app/.env.dist
 COPY .env.docker-build /app/.env
 RUN rm -f /app/.env.local /app/.env.local.php
 

@@ -42,18 +42,30 @@ if [ -n "${DATABASE_URL}" ] && ! echo "${DATABASE_URL}" | grep -q 'serverVersion
         export DATABASE_URL="${DATABASE_URL}?serverVersion=8.0.32&charset=utf8mb4"
     fi
 fi
-# PHP-FPM does not always inherit shell env; write resolved values into .env for web requests.
-if [ -n "${DATABASE_URL}" ]; then
-    grep -v '^DATABASE_URL=' /app/.env > /app/.env.runtime 2>/dev/null || cp /app/.env /app/.env.runtime
-    printf 'DATABASE_URL="%s"\n' "${DATABASE_URL}" >> /app/.env.runtime
-    mv /app/.env.runtime /app/.env
-    echo "Database host configured for Symfony (from Railway MYSQL_URL / DATABASE_URL)."
+# Rebuild .env so Symfony never sees invalid lines (e.g. APP_SECRET pasted with spaces/comments).
+if echo "${APP_SECRET}" | grep -q '[[:space:]]'; then
+    echo "ERROR: APP_SECRET must be one random string with NO spaces or comments." >&2
+    echo "  In Railway Variables, use only hex characters, e.g. a7f3c9e2b1d84f6a0e5c8b2d9f1a4e7c" >&2
 fi
-if [ -n "${APP_SECRET}" ] && [ "${APP_SECRET}" != "unsafe-default-set-APP_SECRET-in-railway" ]; then
-    grep -v '^APP_SECRET=' /app/.env > /app/.env.runtime 2>/dev/null || cp /app/.env /app/.env.runtime
-    printf 'APP_SECRET=%s\n' "${APP_SECRET}" >> /app/.env.runtime
-    mv /app/.env.runtime /app/.env
-fi
+quote_env() {
+    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+{
+    echo "APP_ENV=${APP_ENV}"
+    echo "APP_DEBUG=${APP_DEBUG}"
+    echo "APP_SECRET=\"$(quote_env "${APP_SECRET}")\""
+    echo "APP_ROOT_TO_ADMIN=${APP_ROOT_TO_ADMIN}"
+    [ -n "${DATABASE_URL}" ] && echo "DATABASE_URL=\"$(quote_env "${DATABASE_URL}")\""
+    echo "MAILER_DSN=\"$(quote_env "${MAILER_DSN}")\""
+    echo "MAILER_FROM_ADDRESS=\"$(quote_env "${MAILER_FROM_ADDRESS}")\""
+    echo "MESSENGER_TRANSPORT_DSN=\"$(quote_env "${MESSENGER_TRANSPORT_DSN}")\""
+    echo "CORS_ALLOW_ORIGIN=\"$(quote_env "${CORS_ALLOW_ORIGIN}")\""
+    echo "DEFAULT_URI=\"$(quote_env "${DEFAULT_URI}")\""
+    echo "JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem"
+    echo "JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem"
+    echo "JWT_PASSPHRASE=\"$(quote_env "${JWT_PASSPHRASE}")\""
+} > /app/.env
+echo "Symfony .env file rebuilt for production."
 
 run_console() {
     php bin/console "$@" --env="${APP_ENV}" --no-debug
