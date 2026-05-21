@@ -24,6 +24,7 @@ if [ -z "${DEFAULT_URI}" ] && [ -n "${RAILWAY_PUBLIC_DOMAIN}" ]; then
     export DEFAULT_URI="https://${RAILWAY_PUBLIC_DOMAIN}"
 fi
 export DEFAULT_URI="${DEFAULT_URI:-http://localhost}"
+export APP_ROOT_TO_ADMIN="${APP_ROOT_TO_ADMIN:-0}"
 
 run_console() {
     php bin/console "$@" --env="${APP_ENV}" --no-debug

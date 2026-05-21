@@ -7,14 +7,23 @@ ngrok_root_redirect:
         permanent: false
     condition: "request.headers.get('x-forwarded-host') matches '/ngrok/i' or request.headers.get('x-original-host') matches '/ngrok/i' or request.headers.get('host') matches '/ngrok/i' or request.getHost() matches '/ngrok/i' or request.headers.get('forwarded') matches '/ngrok/i'"
 
-# Default root redirects to the public landing page.
-# Kept after `ngrok_root_redirect` so ngrok hosts still go to admin login.
+# Production / Railway: open admin login at / (set APP_ROOT_TO_ADMIN=1 or use *.up.railway.app)
+admin_root_redirect:
+    path: /
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: adminls_login
+        permanent: false
+    condition: "env('APP_ROOT_TO_ADMIN') == '1' or request.getHost() matches '/\\.up\\.railway\\.app$/'"
+
+# Default root redirects to the public landing page (local dev and storefront URL).
 root_landingpage_redirect:
     path: /
     controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
     defaults:
         route: app_landingpage_legacy
         permanent: false
+    condition: "env('APP_ROOT_TO_ADMIN') != '1' and not request.getHost() matches '/\\.up\\.railway\\.app$/' and not (request.headers.get('x-forwarded-host') matches '/ngrok/i' or request.headers.get('x-original-host') matches '/ngrok/i' or request.headers.get('host') matches '/ngrok/i' or request.getHost() matches '/ngrok/i' or request.headers.get('forwarded') matches '/ngrok/i')"
 
 controllers:
     resource:
