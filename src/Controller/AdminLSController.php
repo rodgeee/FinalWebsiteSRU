@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Adminuser;
+use App\Service\GoogleOAuthSettings;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +20,7 @@ final class AdminLSController extends AbstractController
 {
     #[Route('/adminls/login', name: 'adminls_login', methods: ['GET','POST'])]
     #[Route('/admin/login', name: 'adminls_login_alias', methods: ['GET','POST'])]
-    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
+    public function login(AuthenticationUtils $authenticationUtils, Request $request, GoogleOAuthSettings $googleOAuth): Response
     {
         // When accessed through ngrok over plain HTTP, force HTTPS to avoid losing secure cookies/CSRF tokens.
         if (!$request->isSecure() && str_contains($request->getHost(), 'ngrok')) {
@@ -35,7 +36,8 @@ final class AdminLSController extends AbstractController
         
         return $this->render('adminls/login.html.twig', [
             'last_username' => $lastUsername,
-            'error' => $error
+            'error' => $error,
+            'google_login_enabled' => $googleOAuth->isConfigured(),
         ]);
     }
 

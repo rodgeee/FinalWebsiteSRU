@@ -28,12 +28,20 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-8000}:80"
+    env_file:
+      - path: .env
+        required: false
     environment:
       APP_ENV: ${APP_ENV:-prod}
       APP_DEBUG: ${APP_DEBUG:-0}
       APP_SECRET: ${APP_SECRET:-ChangeMeInProduction}
       DATABASE_URL: mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}?serverVersion=8.0.32&charset=utf8mb4
       SEED_DEMO_PRODUCTS: ${SEED_DEMO_PRODUCTS:-0}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-}
+      GOOGLE_ANDROID_CLIENT_ID: ${GOOGLE_ANDROID_CLIENT_ID:-}
+      DEFAULT_URI: ${DEFAULT_URI:-http://127.0.0.1:8000}
     depends_on:
       mysql:
         condition: service_healthy

@@ -7,6 +7,7 @@ use App\Security\MobileOAuthJwtBridge;
 use App\Service\Google\GoogleCustomerAuthResult;
 use App\Service\Google\GoogleCustomerAuthService;
 use App\Service\Google\GoogleProfile;
+use App\Service\GoogleOAuthSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -28,9 +29,7 @@ final class GoogleLoginController extends AbstractController
     private const OAUTH_ACTION_COOKIE = 'oauth_google_action';
 
     public function __construct(
-        private readonly string $googleClientId,
-        private readonly string $googleClientSecret,
-        private readonly string $googleCallbackUrl,
+        private readonly GoogleOAuthSettings $googleOAuth,
         private readonly MobileOAuthJwtBridge $mobileJwtBridge,
         private readonly GoogleCustomerAuthService $googleCustomerAuth,
     ) {
@@ -50,7 +49,7 @@ final class GoogleLoginController extends AbstractController
 
     private function startOAuth(Request $request, string $action, UrlGeneratorInterface $urlGenerator): RedirectResponse
     {
-        $clientId = $this->googleClientId;
+        $clientId = $this->googleOAuth->clientId();
         $redirectUri = $this->resolveRedirectUri($request, $urlGenerator);
 
         $loginRoute = $action === 'signup' ? 'customer_signup' : 'customer_login';
@@ -162,8 +161,8 @@ final class GoogleLoginController extends AbstractController
             return $this->finalizeOAuthRedirect($request, $this->redirectToRoute('customer_login'));
         }
 
-        $clientId = $this->googleClientId;
-        $clientSecret = $this->googleClientSecret;
+        $clientId = $this->googleOAuth->clientId();
+        $clientSecret = $this->googleOAuth->clientSecret();
         $redirectUri = $this->resolveRedirectUri($request, $urlGenerator);
 
         if ($clientId === '' || $clientSecret === '' || $redirectUri === '') {

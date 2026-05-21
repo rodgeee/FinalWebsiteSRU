@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Staff;
 use App\Repository\StaffRepository;
+use App\Service\GoogleOAuthSettings;
 use App\Service\StaffVerificationService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,15 +25,14 @@ final class StaffGoogleLoginController extends AbstractController
     private const OAUTH_ACTION_COOKIE = 'oauth_google_staff_action';
 
     public function __construct(
-        private readonly string $googleClientId,
-        private readonly string $googleClientSecret,
+        private readonly GoogleOAuthSettings $googleOAuth,
     ) {
     }
 
     #[Route('/adminls/login/google', name: 'staff_login_google', methods: ['GET'])]
     public function start(Request $request, UrlGeneratorInterface $urlGenerator): RedirectResponse
     {
-        $clientId = $this->googleClientId;
+        $clientId = $this->googleOAuth->clientId();
         $redirectUri = $urlGenerator->generate(
             'staff_google_check',
             [],
@@ -123,8 +123,8 @@ final class StaffGoogleLoginController extends AbstractController
             return $this->finalizeOAuthRedirect($request, $this->redirectToRoute('adminls_login'));
         }
 
-        $clientId = $this->googleClientId;
-        $clientSecret = $this->googleClientSecret;
+        $clientId = $this->googleOAuth->clientId();
+        $clientSecret = $this->googleOAuth->clientSecret();
         $redirectUri = $urlGenerator->generate(
             'staff_google_check',
             [],
