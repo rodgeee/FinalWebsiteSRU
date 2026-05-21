@@ -15,7 +15,7 @@ if [ -z "${APP_SECRET}" ]; then
 fi
 export MAILER_DSN="${MAILER_DSN:-null://null}"
 export MAILER_FROM_ADDRESS="${MAILER_FROM_ADDRESS:-noreply@localhost}"
-export MAILER_FROM_NAME="${MAILER_FROM_NAME:-Shoes R' Us}"
+export MAILER_FROM_NAME="${MAILER_FROM_NAME:-Shoes R Us}"
 export MESSENGER_TRANSPORT_DSN="${MESSENGER_TRANSPORT_DSN:-sync://}"
 export CORS_ALLOW_ORIGIN="${CORS_ALLOW_ORIGIN:-^.*$}"
 export JWT_PASSPHRASE="${JWT_PASSPHRASE:-}"
@@ -161,7 +161,11 @@ wait_for_db() {
             echo "Database ready"
             return 0
         fi
-        echo "DB not ready yet (exit ${rc}${err:+: ${err}}), sleeping ${delay}s..."
+        if [ -n "${err}" ]; then
+            echo "DB not ready yet (exit ${rc}): ${err} — sleeping ${delay}s..."
+        else
+            echo "DB not ready yet (exit ${rc}) — sleeping ${delay}s..."
+        fi
         retries=$((retries-1))
         sleep $delay
     done
