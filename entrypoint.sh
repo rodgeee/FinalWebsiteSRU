@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+PORT="${PORT:-80}"
+sed -i "s/__PORT__/${PORT}/g" /etc/nginx/conf.d/symfony.conf
+echo "Nginx will listen on port ${PORT}"
+
 echo "Warming up Symfony cache..."
 php bin/console cache:warmup --env="${APP_ENV:-prod}" --no-debug
 
@@ -10,13 +14,7 @@ if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
 fi
 
 echo "Starting PHP-FPM..."
-php-fpm -F &
-PHP_PID=$!
-
-echo "Waiting for PHP-FPM to start..."
-sleep 2
+php-fpm -D
 
 echo "Starting Nginx..."
-nginx -g "daemon off;"
-
-wait $PHP_PID
+exec nginx -g "daemon off;"

@@ -70,8 +70,9 @@ COPY entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+    CMD sh -c 'curl -f "http://127.0.0.1:${PORT:-80}/" || exit 1'
 
+# Railway sets PORT at runtime; entrypoint configures nginx to match
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
