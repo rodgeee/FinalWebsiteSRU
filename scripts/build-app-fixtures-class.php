@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Builds a single src/DataFixtures/AppFixtures.php (embedded PHP data, no JSON).
+ * Builds src/DataFixtures/FixtureLoader.php (embedded PHP data, production-safe).
  *
  * Usage:
  *   php scripts/build-app-fixtures-class.php
@@ -31,15 +31,14 @@ use App\Entity\Products;
 use App\Entity\Services;
 use App\Entity\Staff;
 use App\Entity\Stocks;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
 /**
  * Application fixtures with embedded database snapshot.
  *
- * Regenerate: php scripts/generate-fixture-data.php
+ * Production-safe loader (no FixturesBundle). Regenerate: php scripts/generate-fixture-data.php
  */
-final class AppFixtures extends Fixture
+final class FixtureLoader
 {
     public function load(ObjectManager \$manager): void
     {
@@ -69,19 +68,19 @@ final class AppFixtures extends Fixture
 
 PHP;
 
-    $loaderFile = $root.'/src/DataFixtures/AppFixtures.php';
+    $loaderFile = $root.'/src/DataFixtures/FixtureLoader.php';
     if (!is_readable($loaderFile)) {
-        throw new RuntimeException('AppFixtures.php must exist before first rebuild (contains loader methods).');
+        throw new RuntimeException('FixtureLoader.php must exist before first rebuild (contains loader methods).');
     }
     $loader = (string) file_get_contents($loaderFile);
     if (!preg_match('/private function loadAdminusers.*private function jsonArray.*?\n    \}/s', $loader, $loaderMatch)) {
-        throw new RuntimeException('Could not extract loader methods from AppFixtures.php');
+        throw new RuntimeException('Could not extract loader methods from FixtureLoader.php');
     }
 
     $methods = $loaderMatch[0];
     $out .= '    '.$methods."\n}\n";
 
-    $target = $root.'/src/DataFixtures/AppFixtures.php';
+    $target = $root.'/src/DataFixtures/FixtureLoader.php';
     file_put_contents($target, $out);
     echo "Written: {$target}\n";
 }

@@ -127,24 +127,36 @@ final class StaffManagementController extends AbstractController
             $statusChoice = $form->get('statusChoice')->getData();
 
             if ($roleChoice === 'ROLE_ADMIN') {
-                // Create a true Adminuser record
-                $admin = new Adminuser();
-                $admin->setFullname((string) $staff->getFullName());
-                $admin->setEmail((string) $staff->getEmail());
-                $hashedPassword = $passwordHasher->hashPassword($admin, (string) $plainPassword);
-                $admin->setPassword($hashedPassword);
-                $entityManager->persist($admin);
-                $entityManager->flush();
+                $email = (string) $staff->getEmail();
+                if ($adminuserRepository->findOneBy(['Email' => $email]) !== null) {
+                    $this->addFlash('error', 'An admin account with this email already exists.');
+                } elseif ($staffRepository->findOneBy(['email' => $email]) !== null) {
+                    $this->addFlash('error', 'This email is already used by a staff account.');
+                } else {
+                    $admin = new Adminuser();
+                    $admin->setFullname((string) $staff->getFullName());
+                    $admin->setEmail($email);
+                    $hashedPassword = $passwordHasher->hashPassword($admin, (string) $plainPassword);
+                    $admin->setPassword($hashedPassword);
+                    $entityManager->persist($admin);
+                    $entityManager->flush();
 
-                $this->addFlash('success', 'Admin account created. They can log in immediately — admin accounts do not use email verification.');
-                $activityLogger->log(
-                    'create',
-                    'admin',
-                    (string) $admin->getId(),
-                    sprintf('Created admin account for %s.', $admin->getEmail()),
-                    sprintf('Admin: %s (ID: %s)', $admin->getEmail(), $admin->getId()),
-                    ['email' => $admin->getEmail(), 'name' => $admin->getFullname()]
-                );
+                    $this->addFlash('success', 'Admin account created. They can log in immediately — admin accounts do not use email verification.');
+                    try {
+                        $activityLogger->log(
+                            'create',
+                            'admin',
+                            (string) $admin->getId(),
+                            sprintf('Created admin account for %s.', $admin->getEmail()),
+                            sprintf('Admin: %s (ID: %s)', $admin->getEmail(), $admin->getId()),
+                            ['email' => $admin->getEmail(), 'name' => $admin->getFullname()]
+                        );
+                    } catch (\Throwable) {
+                        // Account was created; audit logging must not block user management.
+                    }
+
+                    return $this->redirectToRoute('admin_staff_index', [], Response::HTTP_SEE_OTHER);
+                }
             } else {
                 // Create a staff record
                 $hashedPassword = $passwordHasher->hashPassword($staff, (string) $plainPassword);

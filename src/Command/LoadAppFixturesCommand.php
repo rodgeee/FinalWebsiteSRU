@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\DataFixtures\AppFixtures;
+use App\DataFixtures\FixtureLoader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -39,9 +39,9 @@ final class LoadAppFixturesCommand extends Command
             $this->purgeApplicationData();
         }
 
-        (new AppFixtures())->load($this->entityManager);
+        (new FixtureLoader())->load($this->entityManager);
 
-        $io->success('Application fixtures loaded from App\\DataFixtures\\AppFixtures');
+        $io->success('Application fixtures loaded from App\\DataFixtures\\FixtureLoader');
 
         return Command::SUCCESS;
     }

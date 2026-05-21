@@ -34,7 +34,7 @@ class ActivityLog
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Adminuser::class)]
-    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'actor_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
     private ?Adminuser $actor = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -43,7 +43,8 @@ class ActivityLog
     #[ORM\Column(length: 180, nullable: true)]
     private ?string $actorEmail = null;
 
-    #[ORM\Column(length: 36, nullable: true)]
+    /** External actor reference when the actor is not an Adminuser row (fixture import). */
+    #[ORM\Column(name: 'external_actor_ref', length: 36, nullable: true)]
     private ?string $actorId = null;
 
     #[ORM\Column(length: 50, nullable: true)]
