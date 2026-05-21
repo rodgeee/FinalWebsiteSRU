@@ -6,6 +6,13 @@
 parameters:
     mailer_from_address: '%env(MAILER_FROM_ADDRESS)%'
     mailer_from_name: '%env(default::MAILER_FROM_NAME)%'
+    # Safe defaults when deploying without a local .env file (Railway, Docker)
+    cors_allow_origin: '^.*$'
+    mailer_dsn: 'null://null'
+    app_default_uri: 'http://localhost'
+    messenger_dsn: 'sync://'
+    env(MAILER_FROM_ADDRESS): 'noreply@localhost'
+    env(JWT_PASSPHRASE): ''
     # Default when APP_DEEP_LINK_SCHEME is unset (mobile OAuth redirect: vallejera://auth/callback)
     env(APP_DEEP_LINK_SCHEME): 'vallejera'
 
