@@ -11,16 +11,19 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 final class ProductImageUrlResolver
 {
+    /** Storefront fallback when a product has no upload yet (avoids null URLs in the mobile app). */
+    public const PLACEHOLDER_PATH = 'img/shoes-r-us-logo.png';
+
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly string $defaultUri,
     ) {
     }
 
-    public function resolve(?string $path): ?string
+    public function resolve(?string $path): string
     {
         if ($path === null || trim($path) === '') {
-            return null;
+            return $this->placeholderUrl();
         }
 
         $path = trim($path);
@@ -29,6 +32,11 @@ final class ProductImageUrlResolver
         }
 
         return rtrim($this->getBaseUrl(), '/') . '/' . ltrim($path, '/');
+    }
+
+    public function placeholderUrl(): string
+    {
+        return rtrim($this->getBaseUrl(), '/') . '/' . self::PLACEHOLDER_PATH;
     }
 
     /**
@@ -40,13 +48,12 @@ final class ProductImageUrlResolver
     {
         $urls = [];
         foreach ($paths as $path) {
-            $url = $this->resolve($path);
-            if ($url !== null) {
-                $urls[] = $url;
-            }
+            $urls[] = $this->resolve($path);
         }
 
-        return array_values(array_unique($urls));
+        $urls = array_values(array_unique($urls));
+
+        return $urls !== [] ? $urls : [$this->placeholderUrl()];
     }
 
     private function getBaseUrl(): string
