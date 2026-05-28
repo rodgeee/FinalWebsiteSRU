@@ -36,43 +36,52 @@
               <th class="border-b border-border px-4 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {% for o in orders %}
-              <tr>
-                <td class="border-b border-border px-4 py-3 font-mono text-xs">{{ o.displayOrderNumber }}</td>
-                <td class="border-b border-border px-4 py-3">{{ o.customerName }}</td>
-                <td class="border-b border-border px-4 py-3">{{ o.email }}</td>
-                <td class="border-b border-border px-4 py-3">{{ o.orderStatus }}</td>
-                <td class="border-b border-border px-4 py-3">{{ o.totalPrice ? ('₱' ~ o.totalPrice) : '—' }}</td>
-                <td class="border-b border-border px-4 py-3">{{ o.dateCreated ? o.dateCreated|date('Y-m-d H:i') : '—' }}</td>
-                <td class="border-b border-border px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    <a class="text-brand hover:underline" href="{{ path('admin_orders_show', {id: o.id}) }}" aria-label="View" title="View">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </a>
-                    <a class="text-yellow-600 hover:underline" href="{{ path('admin_orders_edit', {id: o.id}) }}" aria-label="Edit" title="Edit">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                    </a>
-                    <form method="post" action="{{ path('admin_orders_delete', {id: o.id}) }}" onsubmit="return confirm('Delete this order? (Use for tests/cancelled only)');">
-                      <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ o.id) }}">
-                      <button class="text-red-600 hover:underline" type="submit" aria-label="Delete" title="Delete">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            {% else %}
-              <tr>
-                <td colspan="7" class="px-4 py-6 text-center text-textMuted">No orders found</td>
-              </tr>
-            {% endfor %}
+          <tbody
+            id="orders-live-body"
+            data-live-url="{{ path('admin_orders_live') }}"
+            data-latest-id="{{ orders|length > 0 ? orders[0].id : 0 }}"
+          >
+            {% include 'orders/_rows.html.twig' with { orders: orders } %}
           </tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tbody = document.getElementById('orders-live-body');
+    if (!tbody) return;
+
+    const liveUrl = tbody.dataset.liveUrl;
+    if (!liveUrl) return;
+
+    let latestId = Number.parseInt(tbody.dataset.latestId || '0', 10) || 0;
+
+    const refreshRows = async () => {
+      try {
+        const response = await fetch(`${liveUrl}?latestId=${latestId}`, {
+          method: 'GET',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!data || !data.hasChanges) return;
+        if (typeof data.rowsHtml === 'string') {
+          tbody.innerHTML = data.rowsHtml;
+        }
+        latestId = Number.parseInt(String(data.latestId ?? latestId), 10) || latestId;
+        tbody.dataset.latestId = String(latestId);
+        window.lucide?.createIcons();
+      } catch (error) {
+        // Silent fail: keeps page usable if network hiccups happen.
+      }
+    };
+
+    setInterval(refreshRows, 5000);
+  });
+</script>
 {% endblock %}
 
 

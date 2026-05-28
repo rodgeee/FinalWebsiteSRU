@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\DataFixtures\DemoCustomerSeeder;
 use App\DataFixtures\FixtureLoader;
+use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +24,8 @@ final class LoadAppFixturesCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly CustomerRepository $customerRepository,
     ) {
         parent::__construct();
     }
@@ -40,8 +45,15 @@ final class LoadAppFixturesCommand extends Command
         }
 
         (new FixtureLoader())->load($this->entityManager);
+        DemoCustomerSeeder::ensureLoaded($this->entityManager, $this->passwordHasher, $this->customerRepository);
+        $this->entityManager->flush();
 
         $io->success('Application fixtures loaded from App\\DataFixtures\\FixtureLoader');
+        $io->note(sprintf(
+            'Demo customer: %s / %s (password synced on every load).',
+            DemoCustomerSeeder::EMAIL,
+            DemoCustomerSeeder::PASSWORD,
+        ));
 
         return Command::SUCCESS;
     }

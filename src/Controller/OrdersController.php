@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Service\ActivityLogger;
 use App\Service\OrderNumberGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -140,14 +141,34 @@ final class OrdersController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(OrdersRepository $ordersRepository): Response
     {
-        $currentStaff = $this->currentStaff();
-        $criteria = [];
-        if ($currentStaff && !$this->isGranted('ROLE_ADMIN')) {
-            $criteria['owner'] = $currentStaff;
-        }
+        $criteria = $this->orderCriteriaForCurrentUser();
 
         return $this->render('orders/index.html.twig', [
             'orders' => $ordersRepository->findBy($criteria, ['DateCreated' => 'DESC'])
+        ]);
+    }
+
+    #[Route('/live', name: 'live', methods: ['GET'])]
+    public function live(Request $request, OrdersRepository $ordersRepository): JsonResponse
+    {
+        $criteria = $this->orderCriteriaForCurrentUser();
+        $orders = $ordersRepository->findBy($criteria, ['DateCreated' => 'DESC']);
+        $latestId = $orders[0]->getId() ?? 0;
+        $clientLatestId = (int) $request->query->get('latestId', 0);
+
+        if ($latestId === $clientLatestId) {
+            return $this->json([
+                'hasChanges' => false,
+                'latestId' => $latestId,
+            ]);
+        }
+
+        return $this->json([
+            'hasChanges' => true,
+            'latestId' => $latestId,
+            'rowsHtml' => $this->renderView('orders/_rows.html.twig', [
+                'orders' => $orders,
+            ]),
         ]);
     }
 
@@ -254,6 +275,20 @@ final class OrdersController extends AbstractController
         $user = $this->getUser();
 
         return $user instanceof \App\Entity\Staff ? $user : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function orderCriteriaForCurrentUser(): array
+    {
+        $currentStaff = $this->currentStaff();
+        $criteria = [];
+        if ($currentStaff && !$this->isGranted('ROLE_ADMIN')) {
+            $criteria['owner'] = $currentStaff;
+        }
+
+        return $criteria;
     }
 
     private function assignOrAssertOwnership(Orders $order): void

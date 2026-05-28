@@ -8,7 +8,6 @@ use App\Repository\ProductsRepository;
 use App\Service\Api\ApiResponseFactory;
 use App\Service\Api\CustomerResourceSerializer;
 use App\Service\Checkout\CustomerCheckoutService;
-use App\Service\Product\ProductImageUrlResolver;
 use App\Service\Product\ProductSizeParser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +23,6 @@ final class ProductController extends AbstractApiController
         private readonly CustomerResourceSerializer $serializer,
         private readonly CustomerCheckoutService $checkoutService,
         private readonly ProductSizeParser $productSizeParser,
-        private readonly ProductImageUrlResolver $productImageUrlResolver,
     ) {
         parent::__construct($api);
     }
@@ -51,10 +49,7 @@ final class ProductController extends AbstractApiController
             );
         }
 
-        return $this->api->success($data, meta: [
-            'count' => \count($data),
-            'placeholderImageUrl' => $this->productImageUrlResolver->placeholderUrl(),
-        ]);
+        return $this->api->success($data, meta: ['count' => \count($data)]);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'], requirements: ['id' => '\d+'])]
